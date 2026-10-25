@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/store"
 )
 
 // Local-mode identity (FR-ADM-001). The slug is fixed so EnsureLocalTenant is

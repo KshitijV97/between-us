@@ -18,7 +18,7 @@ footprint, consumes scarce free-tier storage and complicates erasure.
 Stage uploads only for the duration of processing (temp file locally; short-TTL staging hosted), record a
 SHA-256 of the file in `imports.file_sha256`, and delete the staged file when the import completes, fails or
 is cancelled. Media files inside zips are enumerated for counts and never stored in MVP. Users may opt in with
-`CA_KEEP_RAW_EXPORTS=true` (local) or a workspace setting (hosted) to allow re-processing with newer parsers.
+`BU_KEEP_RAW_EXPORTS=true` (local) or a workspace setting (hosted) to allow re-processing with newer parsers.
 
 ## Alternatives considered
 

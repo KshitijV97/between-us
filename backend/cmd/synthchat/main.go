@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/synth"
+	"github.com/kshitijv97/between-us/backend/internal/synth"
 )
 
 func main() {

@@ -10,7 +10,7 @@ The latest minor release receives security fixes. Older releases: best effort.
 
 Please **do not open a public issue**. Use GitHub's **"Report a vulnerability"** (private security advisory)
 on this repository. Include steps to reproduce, impact, and the affected version or commit
-(`chatanalyzer version`).
+(`betweenus version`).
 
 **Never include real chat data.** Use synthetic examples with fictional participants.
 

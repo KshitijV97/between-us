@@ -2,10 +2,10 @@
 //
 // Release builds set Version, Commit and Date through linker flags, e.g.
 //
-//	go build -ldflags "-X github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo.Version=v0.1.0"
+//	go build -ldflags "-X github.com/kshitijv97/between-us/backend/internal/buildinfo.Version=v0.1.0"
 //
 // Development builds fall back to the VCS information that the Go toolchain
-// embeds automatically (see runtime/debug.ReadBuildInfo), so `chatanalyzer
+// embeds automatically (see runtime/debug.ReadBuildInfo), so `betweenus
 // version` is meaningful even without a release pipeline.
 package buildinfo
 
@@ -27,7 +27,7 @@ var (
 )
 
 // Info is the JSON-serialisable build description served by GET /version
-// (NFR-OBS-004) and printed by `chatanalyzer version`.
+// (NFR-OBS-004) and printed by `betweenus version`.
 type Info struct {
 	Version   string `json:"version"`
 	Commit    string `json:"commit"`

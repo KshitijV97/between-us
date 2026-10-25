@@ -1,4 +1,4 @@
-# Chat Analyzer — Security, Privacy & Compliance
+# Between Us — Security, Privacy & Compliance
 
 | Field | Value |
 |---|---|
@@ -46,7 +46,7 @@ flowchart LR
         U["User browser / PWA"]
         F["Export file"]
     end
-    subgraph B1["Boundary 1: Chat Analyzer service"]
+    subgraph B1["Boundary 1: Between Us service"]
         W["Web UI static assets"]
         API["Go API"]
         P["Parser sandbox<br/>bounded memory and time"]
@@ -165,14 +165,14 @@ configures a remote endpoint (PRV-001).
 
 ```mermaid
 flowchart TB
-    KEK["KEK<br/>from env CA_MASTER_KEY or KMS"] -->|"wraps"| DEK["Per-tenant DEK<br/>AES-256, stored wrapped in tenant_keys"]
+    KEK["KEK<br/>from env BU_MASTER_KEY or KMS"] -->|"wraps"| DEK["Per-tenant DEK<br/>AES-256, stored wrapped in tenant_keys"]
     DEK -->|"AES-256-GCM, AAD = tenant_id + message_id"| C["messages.body_ct"]
     DEK -->|"same"| Q["qa_messages, insights.content_ct"]
     R["Rotation job"] -->|"new KEK version: rewrap DEKs only"| DEK
     R2["DEK rotation"] -->|"new DEK version: lazy re-encrypt on read + background sweep"| C
 ```
 
-- **KEK:** 256-bit key from `CA_MASTER_KEY` (base64) with a version id; optional adapters for HashiCorp Vault Transit /
+- **KEK:** 256-bit key from `BU_MASTER_KEY` (base64) with a version id; optional adapters for HashiCorp Vault Transit /
   OpenBao (FOSS) and cloud KMS. Never stored in the DB.
 - **DEK:** one per tenant (`tenant_keys(tenant_id, version, wrapped_dek, created_at, retired_at)`).
   Unwrapped DEKs cached in memory for ≤ 10 min, zeroed on eviction (best effort in Go).
@@ -253,11 +253,11 @@ including instructions aimed at the model.
 ## 12. Egress allow-list and test (PRV-001)
 
 - All outbound HTTP goes through one `egress.Client` (wrapping `http.Transport.DialContext`) that permits only
-  hosts derived from configuration (`CA_LLM_BASE_URL`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `CA_SMTP_HOST`,
+  hosts derived from configuration (`BU_LLM_BASE_URL`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `BU_SMTP_HOST`,
   IdP issuer/JWKS, …). Any other destination fails closed and increments `egress_blocked_total`.
 - `net.Dial` outside this package is forbidden by a lint rule (`forbidigo`) in CI.
-- **Egress test** (MVP acceptance criterion 6): an integration test starts `chatanalyzer serve` in local mode
-  with no remote endpoints, runs import → dashboard → insights (`CA_LLM_PROVIDER=none`) and asserts zero
+- **Egress test** (MVP acceptance criterion 6): an integration test starts `betweenus serve` in local mode
+  with no remote endpoints, runs import → dashboard → insights (`BU_LLM_PROVIDER=none`) and asserts zero
   outbound connection attempts, using a dialer hook plus, on Linux CI, a network namespace with no route.
 - Telemetry, update checks and font/CDN loading are **off/absent** in local mode: the web UI bundles its fonts
   and icons.

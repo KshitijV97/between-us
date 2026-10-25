@@ -1,5 +1,5 @@
 /**
- * Minimal typed HTTP client for the Chat Analyzer API.
+ * Minimal typed HTTP client for the Between Us API.
  *
  * From M2 on, request/response types are generated from
  * backend/api/openapi.yaml (FR-API-002); this hand-written layer keeps the same

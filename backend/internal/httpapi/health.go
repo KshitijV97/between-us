@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo"
+	"github.com/kshitijv97/between-us/backend/internal/buildinfo"
 )
 
 // ReadinessCheck reports whether a dependency (database, migrations…) is ready

@@ -15,7 +15,7 @@ func TestRunCommands(t *testing.T) {
 	}{
 		{nil, exitUsage, "Usage:"},
 		{[]string{"help"}, exitOK, "Commands:"},
-		{[]string{"version"}, exitOK, "chatanalyzer "},
+		{[]string{"version"}, exitOK, "betweenus "},
 		{[]string{"bogus"}, exitUsage, `unknown command "bogus"`},
 		{[]string{"version", "-nope"}, exitUsage, "flag provided but not defined"},
 	}

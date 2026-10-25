@@ -13,9 +13,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/between-us/backend/internal/ingest"
 	// Registers the Telegram parser for the end-to-end test.
-	_ "github.com/kshitijv97/chat-analyzer/backend/internal/ingest/telegram"
+	_ "github.com/kshitijv97/between-us/backend/internal/ingest/telegram"
 )
 
 // entry describes one file to put in a test zip. Zips are generated per test

@@ -1,4 +1,4 @@
-# Chat Analyzer — developer entry points. Run `make help` for the list.
+# Between Us — developer entry points. Run `make help` for the list.
 #
 # Requirements: Go (any recent version; go.mod's toolchain line downloads the
 # pinned one automatically), Node.js 24 with npm, and optionally Docker.
@@ -9,14 +9,14 @@ SHELL := /bin/bash
 
 BACKEND := backend
 WEB     := web
-BIN     := bin/chatanalyzer
+BIN     := bin/betweenus
 UI_DIST := $(BACKEND)/internal/webui/dist
 
 # Build metadata injected into internal/buildinfo (see its package docs).
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  ?= $(shell git rev-parse HEAD 2>/dev/null)
 DATE    ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-PKG     := github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo
+PKG     := github.com/kshitijv97/between-us/backend/internal/buildinfo
 LDFLAGS := -s -w -X $(PKG).Version=$(VERSION) -X $(PKG).Commit=$(COMMIT) -X $(PKG).Date=$(DATE)
 
 .PHONY: help
@@ -40,7 +40,7 @@ $(WEB)/node_modules: $(WEB)/package-lock.json
 dev: $(WEB)/node_modules ## Run the Go API (:7420) and Vite dev server (:5173) together
 	@echo "API → http://127.0.0.1:7420   UI → http://127.0.0.1:5173 (Ctrl-C stops both)"
 	@trap 'kill 0' INT TERM EXIT; \
-	  (cd $(BACKEND) && CA_LOG_LEVEL=debug go run ./cmd/chatanalyzer serve) & \
+	  (cd $(BACKEND) && BU_LOG_LEVEL=debug go run ./cmd/betweenus serve) & \
 	  (cd $(WEB) && npm run dev -- --host 127.0.0.1) & \
 	  wait
 
@@ -52,7 +52,7 @@ run: build ## Build everything and run the single binary (embedded UI)
 
 .PHONY: build
 build: web-build embed-ui ## Build the web UI and the Go binary with the UI embedded
-	cd $(BACKEND) && CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o ../$(BIN) ./cmd/chatanalyzer
+	cd $(BACKEND) && CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o ../$(BIN) ./cmd/betweenus
 	@ls -lh $(BIN) | awk '{print "built " $$9 " (" $$5 ")"}'
 
 .PHONY: web-build
@@ -67,14 +67,14 @@ embed-ui:
 
 .PHONY: docker
 docker: ## Build the container image (cloud-free-container profile)
-	docker build --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t chatanalyzer:$(VERSION) .
+	docker build --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t betweenus:$(VERSION) .
 
 .PHONY: demo
 demo: build ## Import a fictional 5,000-message chat into a throwaway data dir
 	@mkdir -p .demo
 	cd $(BACKEND) && go run ./cmd/synthchat -format whatsapp -n 5000 > "../.demo/WhatsApp Chat with Bob.txt"
-	CA_DATA_DIR=.demo ./$(BIN) import -tz Asia/Kolkata ".demo/WhatsApp Chat with Bob.txt"
-	@echo "Inspect with: CA_DATA_DIR=.demo ./$(BIN) chats"
+	BU_DATA_DIR=.demo ./$(BIN) import -tz Asia/Kolkata ".demo/WhatsApp Chat with Bob.txt"
+	@echo "Inspect with: BU_DATA_DIR=.demo ./$(BIN) chats"
 
 ## ---------------------------------------------------------------- quality
 

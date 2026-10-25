@@ -15,7 +15,7 @@ import (
 	"testing/fstest"
 	"time"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
+	"github.com/kshitijv97/between-us/backend/internal/config"
 )
 
 // testUI is a minimal built SPA: an index page and one fingerprinted asset.

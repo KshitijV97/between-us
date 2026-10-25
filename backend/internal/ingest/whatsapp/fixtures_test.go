@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/between-us/backend/internal/ingest"
 )
 
 var update = flag.Bool("update", false, "rewrite testdata fixtures and golden files")

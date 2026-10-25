@@ -22,16 +22,16 @@ COPY --from=web /src/web/dist/ ./internal/webui/dist/
 ARG VERSION=dev
 ARG COMMIT=""
 RUN go build -trimpath \
-      -ldflags "-s -w -X github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo.Version=${VERSION} -X github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo.Commit=${COMMIT}" \
-      -o /out/chatanalyzer ./cmd/chatanalyzer
+      -ldflags "-s -w -X github.com/kshitijv97/between-us/backend/internal/buildinfo.Version=${VERSION} -X github.com/kshitijv97/between-us/backend/internal/buildinfo.Commit=${COMMIT}" \
+      -o /out/betweenus ./cmd/betweenus
 
 # --- 3. Runtime ----------------------------------------------------------------
 # Distroless "static" has no shell or package manager (small attack surface,
 # SEC-007) and runs as an unprivileged user.
 FROM gcr.io/distroless/static-debian13:nonroot
-COPY --from=api /out/chatanalyzer /usr/local/bin/chatanalyzer
-ENV CA_PROFILE=cloud-free-container
+COPY --from=api /out/betweenus /usr/local/bin/betweenus
+ENV BU_PROFILE=cloud-free-container
 EXPOSE 7420
 USER nonroot:nonroot
-ENTRYPOINT ["/usr/local/bin/chatanalyzer"]
+ENTRYPOINT ["/usr/local/bin/betweenus"]
 CMD ["serve"]

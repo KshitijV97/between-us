@@ -1,4 +1,4 @@
-# Chat Analyzer — Requirements Specification
+# Between Us — Requirements Specification
 
 | Field | Value |
 |---|---|
@@ -44,7 +44,7 @@ People carry years of their most important relationships inside chat apps, but t
 being said during a particular week. Chat exports exist (WhatsApp `.txt`/`.zip`, Telegram Desktop JSON), but
 they are raw text dumps.
 
-**Chat Analyzer** turns an exported **one-to-one conversation** into:
+**Between Us** turns an exported **one-to-one conversation** into:
 
 - **Hard metrics** — volume, balance, response times, initiations, activity rhythms, streaks, silences —
   computed for any time window (day, week, month, year, custom range).
@@ -105,7 +105,7 @@ alerting and pluggable notifications from day one.
 
 ```mermaid
 flowchart LR
-    A[Export chat from<br/>WhatsApp or Telegram] --> B[Drop file into<br/>Chat Analyzer]
+    A[Export chat from<br/>WhatsApp or Telegram] --> B[Drop file into<br/>Between Us]
     B --> C{Parser detects<br/>platform and format}
     C -->|ok| D[Confirm participants,<br/>timezone, consent]
     C -->|unrecognised| X[Show actionable error<br/>with format hints]
@@ -143,7 +143,7 @@ Messenger), SMS notifications, SSO/SAML, shared reports, mobile apps, live Teleg
 flowchart TB
     user([End user<br/>browser or PWA])
     admin([Operator])
-    subgraph CA[Chat Analyzer]
+    subgraph CA[Between Us]
         web[Web UI<br/>React + TypeScript]
         api[API + workers<br/>Go single binary]
         db[(SQLite local<br/>or PostgreSQL cloud)]
@@ -169,7 +169,7 @@ flowchart TB
 
 | ID | Requirement | Priority | Phase |
 |---|---|---|---|
-| FR-ING-001 | Accept file upload by drag-and-drop, file picker, and CLI (`chatanalyzer import <file>`). | M | MVP |
+| FR-ING-001 | Accept file upload by drag-and-drop, file picker, and CLI (`betweenus import <file>`). | M | MVP |
 | FR-ING-002 | Auto-detect platform and format from content (not filename): WhatsApp Android, WhatsApp iOS, Telegram Desktop JSON. | M | MVP |
 | FR-ING-003 | WhatsApp: support both line formats (`dd/mm/yy, hh:mm - Name: text` and `[dd/mm/yy, hh:mm:ss] Name: text`), 12h/24h clocks, locale date orders (DMY/MDY/YMD) inferred statistically, multi-line messages, and invisible Unicode marks (U+200E, U+202F, BOM). | M | MVP |
 | FR-ING-004 | WhatsApp: recognise system lines and placeholders (encryption notice, `<Media omitted>`, `image omitted`, `This message was deleted`, `<This message was edited>`, missed calls, location shares, contact cards) and map them to typed events, not text. | M | MVP |
@@ -380,7 +380,7 @@ For a selected participant and window the system returns:
 | NFR-PERF-003 | Dashboard API for any window p95 ≤ 300 ms local, ≤ 800 ms hosted (excluding cold starts). |
 | NFR-PERF-004 | Web UI initial JS ≤ 250 KB gzipped; route-level code splitting; charts lazy-loaded. |
 | NFR-PERF-005 | Q&A first token ≤ 3 s with a hosted LLM; ≤ 10 s with a local 7–8B model on Apple Silicon. |
-| NFR-PERF-006 | Supported scale per chat: 1M messages; per tenant (free plan): configurable, default 5 chats / 500k messages. A ~500 MB free-tier database holds only one or two tenants at that quota ([sizing](03-data-model.md#8-sizing-vs-free-tiers)), so public free instances should lower `CA_QUOTA_MESSAGES`. |
+| NFR-PERF-006 | Supported scale per chat: 1M messages; per tenant (free plan): configurable, default 5 chats / 500k messages. A ~500 MB free-tier database holds only one or two tenants at that quota ([sizing](03-data-model.md#8-sizing-vs-free-tiers)), so public free instances should lower `BU_QUOTA_MESSAGES`. |
 
 ### 9.2 Reliability and operability (`NFR-REL`, `NFR-OBS`)
 
@@ -389,7 +389,7 @@ For a selected participant and window the system returns:
 | NFR-REL-001 | Hosted availability SLO 99.5% monthly for the API (free tiers allow cold starts; SLO measured on warm requests + synthetic checks). |
 | NFR-REL-002 | Imports and insight generation are idempotent, resumable jobs; a crash never leaves a half-imported chat visible. |
 | NFR-REL-003 | Graceful degradation: LLM, telemetry backend or mail outage never breaks import or analytics. |
-| NFR-REL-004 | Database migrations are versioned, forward-only, and run automatically (or via `chatanalyzer migrate`). |
+| NFR-REL-004 | Database migrations are versioned, forward-only, and run automatically (or via `betweenus migrate`). |
 | NFR-REL-005 | Backups: documented procedure + scheduled encrypted `pg_dump` for hosted (Supabase Free has **no** automatic backups); local DB is a single file the user can copy. |
 | NFR-OBS-001 | **Traces:** OpenTelemetry for every HTTP request, DB query, job, LLM call and outbound notification; W3C trace context propagated from the browser. |
 | NFR-OBS-002 | **Metrics:** RED (rate, errors, duration) per route; USE for runtime; business metrics (imports, messages parsed, LLM tokens/cost, notifications sent) exported via OTLP and a Prometheus `/metrics` endpoint. |
@@ -498,12 +498,12 @@ These are binding for the design docs; each will have an ADR in [`docs/adr/`](ad
 
 | Area | Decision | Rationale |
 |---|---|---|
-| Backend | **Go** (≥ 1.22, stdlib `net/http` routing, `log/slog`), single binary `chatanalyzer` with subcommands `serve`, `migrate`, `import`, `worker`, `version`. | Low memory, fast start, easy distribution. |
+| Backend | **Go** (≥ 1.22, stdlib `net/http` routing, `log/slog`), single binary `betweenus` with subcommands `serve`, `migrate`, `import`, `worker`, `version`. | Low memory, fast start, easy distribution. |
 | Frontend | **React + TypeScript + Vite**, TanStack Query, Tailwind CSS + shadcn/ui (MIT), Recharts for charts. Built assets embedded into the Go binary via `embed` for local mode, served from Vercel/CDN in hosted mode. | Preferred stack; lean static bundle. |
 | Repo layout | Monorepo: `backend/` (Go module), `web/` (React app), `deploy/` (compose, Vercel, Grafana, alert rules), `docs/`. | One place for code, infra and docs. |
 | Storage | **SQLite** (pure-Go `modernc.org/sqlite`, FTS5) for local profile; **PostgreSQL ≥ 15** (Supabase or Aiven free tier) for hosted, with `pgvector` + `tsvector`. A `store` interface hides the difference; migrations via `goose`. | Zero-dependency local; managed free Postgres in cloud. |
 | Jobs | DB-backed job table (no external broker). Two execution modes: `inprocess` workers (local / container hosts) and `pump` (batch steps driven by the polling UI, with a daily cron for housekeeping, because Vercel Hobby cron runs at most once a day). | Works on free serverless tiers without Redis. |
-| AI | `LLMProvider` interface (`CA_LLM_PROVIDER`, default `none` so the binary works with nothing installed; first-run setup detects a local Ollama and offers to enable it): `ollama` (recommended local), `openai-compatible` (Groq, OpenRouter, Gemini OpenAI-compat endpoint, LM Studio, vLLM, llama.cpp server), `anthropic`, `none`. Embeddings via the same interface. | Free and local by default, pluggable. |
+| AI | `LLMProvider` interface (`BU_LLM_PROVIDER`, default `none` so the binary works with nothing installed; first-run setup detects a local Ollama and offers to enable it): `ollama` (recommended local), `openai-compatible` (Groq, OpenRouter, Gemini OpenAI-compat endpoint, LM Studio, vLLM, llama.cpp server), `anthropic`, `none`. Embeddings via the same interface. | Free and local by default, pluggable. |
 | Sentiment (deterministic) | Lexicon-based (VADER-style) with multilingual + emoji lexicons, extensible per language. | Works offline at zero cost. |
 | Auth | `AuthProvider` interface: `local`, `supabase`, `oidc`. | Free hosted auth; FOSS self-hosted option. |
 | Observability | **OpenTelemetry** SDK (traces, metrics, logs) → OTLP. Local: `grafana/otel-lgtm` all-in-one (Grafana, Loki, Tempo, Prometheus/Mimir) via Docker Compose. Hosted: Grafana Cloud free tier (or self-hosted LGTM). Error tracking optional via GlitchTip (FOSS, Sentry-compatible). | Vendor-neutral FOSS standard. |
@@ -531,7 +531,7 @@ Detailed milestones: [10-roadmap.md](10-roadmap.md).
 2. Re-importing the same file adds zero messages; importing a longer export adds only new ones.
 3. For a fixture chat, every metric M-001…M-027 matches hand-computed expected values for a day, week, month,
    year and custom window, including a DST boundary.
-4. With `CA_LLM_PROVIDER=none`, the dashboard, deterministic sentiment and rule-based relationship signals work.
+4. With `BU_LLM_PROVIDER=none`, the dashboard, deterministic sentiment and rule-based relationship signals work.
 5. With Ollama, relationship profile, mood and mind and Q&A return outputs whose every claim cites a message in
    the selected window; uncited claims are rejected by the validator.
 6. In local mode with no remote endpoints configured, an egress test confirms zero outbound connections.
@@ -591,4 +591,4 @@ reasoning is traceable; reopen one by changing its status.
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-10-24 | First draft. |
-| 0.2 | 2026-10-24 | Changes found while writing the design docs: chunked uploads and in-browser zip extraction (FR-ING-016/017) for serverless body limits; HTTP email adapter for SMTP-blocked hosts; UI-driven pump mode; timezone-keyed rollups; brute-force local vector search instead of sqlite-vec; M-011/M-020/M-022 clarifications; 18+ hosted sign-up (PRV-008); blind-index note for encrypted search; unpaid-training LLM providers blocked by default; `CA_LLM_PROVIDER` defaults to `none`. |
+| 0.2 | 2026-10-24 | Changes found while writing the design docs: chunked uploads and in-browser zip extraction (FR-ING-016/017) for serverless body limits; HTTP email adapter for SMTP-blocked hosts; UI-driven pump mode; timezone-keyed rollups; brute-force local vector search instead of sqlite-vec; M-011/M-020/M-022 clarifications; 18+ hosted sign-up (PRV-008); blind-index note for encrypted search; unpaid-training LLM providers blocked by default; `BU_LLM_PROVIDER` defaults to `none`. |

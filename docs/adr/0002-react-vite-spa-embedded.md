@@ -16,7 +16,7 @@ free CDN (Vercel/Cloudflare Pages). Server-side rendering would require a Node r
 ## Decision
 
 Build a client-side SPA with React, TypeScript and Vite (TanStack Query, Tailwind + shadcn/ui, Recharts). The
-production build is copied into `backend/webdist/` and embedded with `//go:embed` so `chatanalyzer serve`
+production build is copied into `backend/webdist/` and embedded with `//go:embed` so `betweenus serve`
 serves UI and API from one origin. Hosted mode deploys the same build as static files. The SPA talks only to
 `/api/v1` through a client generated from `openapi.yaml`.
 

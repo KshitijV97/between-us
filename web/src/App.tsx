@@ -8,7 +8,7 @@ export function App() {
   return (
     <main className="shell">
       <header>
-        <h1>Chat Analyzer</h1>
+        <h1>Between Us</h1>
         <p className="tagline">
           Understand a two-person conversation: metrics, patterns, and mood over time, from a
           WhatsApp or Telegram export. Everything stays on this machine in local mode.

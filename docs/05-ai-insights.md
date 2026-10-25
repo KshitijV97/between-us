@@ -1,4 +1,4 @@
-# Chat Analyzer — AI Insights and Q&A Design
+# Between Us — AI Insights and Q&A Design
 
 | Field | Value |
 |---|---|
@@ -126,15 +126,15 @@ concurrency semaphore, token counting (provider-reported, else `chars/4` estimat
 
 | Variable | Example | Purpose |
 |---|---|---|
-| `CA_LLM_PROVIDER` | `ollama` \| `openai-compatible` \| `anthropic` \| `none` | Chat provider (default `none`; local profile docs suggest `ollama`). |
-| `CA_LLM_BASE_URL` | `http://localhost:11434` | Endpoint (Ollama, any OpenAI-compatible server). |
-| `CA_LLM_API_KEY` | — | Secret, only for hosted providers. |
-| `CA_LLM_MODEL` | `qwen3:8b` | Main model: summaries, mood, relationship, Q&A answers. |
-| `CA_LLM_FAST_MODEL` | `qwen3:1.7b` | Cheap model: emotion labels, intent routing, query rewrites. Defaults to the main model. |
-| `CA_LLM_MAX_CONCURRENCY` | `2` | Parallel requests per process. |
-| `CA_LLM_TIMEOUT` | `120s` | Per-request timeout (keep below the host's function limit in `pump` mode). |
-| `CA_EMBED_PROVIDER` / `CA_EMBED_MODEL` | `none` / — (suggested local: `ollama` / `bge-m3`) | Embeddings; `none` disables vector search (FTS only). |
-| `CA_LLM_DEBUG_CAPTURE` | `false` | Local mode only: write rendered prompts/outputs to a local file for prompt debugging. Refused in hosted mode. |
+| `BU_LLM_PROVIDER` | `ollama` \| `openai-compatible` \| `anthropic` \| `none` | Chat provider (default `none`; local profile docs suggest `ollama`). |
+| `BU_LLM_BASE_URL` | `http://localhost:11434` | Endpoint (Ollama, any OpenAI-compatible server). |
+| `BU_LLM_API_KEY` | — | Secret, only for hosted providers. |
+| `BU_LLM_MODEL` | `qwen3:8b` | Main model: summaries, mood, relationship, Q&A answers. |
+| `BU_LLM_FAST_MODEL` | `qwen3:1.7b` | Cheap model: emotion labels, intent routing, query rewrites. Defaults to the main model. |
+| `BU_LLM_MAX_CONCURRENCY` | `2` | Parallel requests per process. |
+| `BU_LLM_TIMEOUT` | `120s` | Per-request timeout (keep below the host's function limit in `pump` mode). |
+| `BU_EMBED_PROVIDER` / `BU_EMBED_MODEL` | `none` / — (suggested local: `ollama` / `bge-m3`) | Embeddings; `none` disables vector search (FTS only). |
+| `BU_LLM_DEBUG_CAPTURE` | `false` | Local mode only: write rendered prompts/outputs to a local file for prompt debugging. Refused in hosted mode. |
 
 Workspace settings (`FR-ADM-004`) further restrict which providers a tenant may use, and hold the hosted-LLM
 opt-in and redaction level (§4.4).
@@ -173,7 +173,7 @@ OpenRouter free models, Google Gemini's OpenAI-compatible endpoint. Through `ant
 
 ## 3. Deterministic fallbacks
 
-With `CA_LLM_PROVIDER=none` (or when the provider is down, over quota, or not opted in) every feature still
+With `BU_LLM_PROVIDER=none` (or when the provider is down, over quota, or not opted in) every feature still
 returns something useful (`FR-AI-007`, `NFR-REL-003`). The UI labels the method ("rule-based").
 
 | Feature | LLM path | Deterministic fallback |
@@ -276,7 +276,7 @@ Feeds mood and mind (`FR-AI-002`) and `daily_rollups.emotion_counts`.
 - **Batching:** 40 target messages per request, each preceded by up to 2 context lines marked `ctx` that are
   *not* classified. Output schema: `[{ "ref": "m12", "e": "anxiety", "i": 2 }]`. Missing or invalid refs are
   retried once in a smaller batch, then fall back to the lexicon label.
-- **Model:** `CA_LLM_FAST_MODEL`.
+- **Model:** `BU_LLM_FAST_MODEL`.
 - **Scheduling:** on demand for windows a user opens (mood view prioritises the visible window), then a
   low-priority background backfill (newest first), paused when the tenant's remaining token quota < 20 %.
 - **Storage:** `messages.emotion`, `messages.emotion_intensity`, `messages.emotion_source` (`lexicon` |
@@ -797,7 +797,7 @@ are added to the prompt's ref table.
   message_count, from_ts, to_ts, token_count, embed_model, embedding)`. Chunk **text is not stored**; it is
   rebuilt from messages when needed, so there is no second copy of sensitive text.
 - **Lifecycle:** chunks for new sessions are embedded by an `insight.embed_chunks` job after import; changing
-  `CA_EMBED_MODEL` triggers a re-embed job. The `embedding` column is a dimensionless `vector` with
+  `BU_EMBED_MODEL` triggers a re-embed job. The `embedding` column is a dimensionless `vector` with
   `embed_model` alongside it, so models with different dimensions can coexist during migration.
 
 ### 11.6 SSE event format
@@ -884,7 +884,7 @@ flowchart TB
   (`backend/internal/safety/banned_terms.yaml`).
 - **Resources panel:** content from `safety/resources/<locale>.yaml`, editable by operators; shown once per
   window view, dismissible, never blocking.
-- **Privacy:** only a counter metric (`ca_safety_flags_total{feature}`) is recorded — no content, no
+- **Privacy:** only a counter metric (`bu_safety_flags_total{feature}`) is recorded — no content, no
   per-tenant detail in logs, no notifications to anyone.
 - **Q&A:** questions seeking to surveil or control the other person (e.g. "how do I track where he is") get a
   scope refusal; questions about sensitive messages are answered factually with care-mode rules.
@@ -910,7 +910,7 @@ backend/internal/insights/prompts/
 
 - Go `text/template` with custom delimiters `[[` `]]` (so the `{{P1}}`/`{{P2}}` and `{{stat:…}}` placeholders
   pass through literally) and a YAML front-matter block (`id`, `version`, `max_output_tokens`, `schema`,
-  `temperature`, `model_role: main|fast`). Embedded with `embed.FS`; `CA_PROMPT_DIR` can override in local
+  `temperature`, `model_role: main|fast`). Embedded with `embed.FS`; `BU_PROMPT_DIR` can override in local
   mode for experiments.
 - A version bump is required for any semantic change and must pass the evaluation gates (§16) before merge.
 - The effective `prompt_version` includes the template hash (§9.2).
@@ -1077,14 +1077,14 @@ spans, logs or metrics (`PRV-007`).
 | Signal | Name | Attributes |
 |---|---|---|
 | Span | `insight.generate`, `insight.validate`, `llm.chat`, `llm.embed`, `qa.answer`, `qa.tool`, `search.hybrid` | feature, provider, model, prompt_version, window_kind, outcome (no content) |
-| Counter | `ca_llm_tokens_total` | provider, model, feature, direction (`in`/`out`) |
-| Counter | `ca_llm_cost_usd_total` | provider, model |
-| Histogram | `ca_llm_request_duration_seconds` | provider, model, feature |
-| Counter | `ca_llm_errors_total` | provider, code |
-| Counter | `ca_insight_claims_stripped_total` | feature, reason (`no_ref`, `hallucinated_ref`, `number`) |
-| Counter | `ca_qa_answers_total` | intent, outcome (`answered`, `no_evidence`, `declined`, `error`) |
-| Gauge | `ca_tenant_llm_quota_used_ratio` | tenant (hashed) |
-| Counter | `ca_safety_flags_total` | feature |
+| Counter | `bu_llm_tokens_total` | provider, model, feature, direction (`in`/`out`) |
+| Counter | `bu_llm_cost_usd_total` | provider, model |
+| Histogram | `bu_llm_request_duration_seconds` | provider, model, feature |
+| Counter | `bu_llm_errors_total` | provider, code |
+| Counter | `bu_insight_claims_stripped_total` | feature, reason (`no_ref`, `hallucinated_ref`, `number`) |
+| Counter | `bu_qa_answers_total` | intent, outcome (`answered`, `no_evidence`, `declined`, `error`) |
+| Gauge | `bu_tenant_llm_quota_used_ratio` | tenant (hashed) |
+| Counter | `bu_safety_flags_total` | feature |
 
 Alert suggestions: LLM error rate > 10 % for 10 min, stripped-claims ratio > 30 % for a prompt version (quality
 regression), quota ratio > 0.8 per tenant (routes to the tenant owner via notifications).

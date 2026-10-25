@@ -1,9 +1,9 @@
 {
-  "name": "chat-analyzer-web",
+  "name": "between-us-web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Chat Analyzer web UI (React + TypeScript + Vite)",
+  "description": "Between Us web UI (React + TypeScript + Vite)",
   "license": "Apache-2.0",
   "engines": {
     "node": "^22.22.2 || >=24.15.0"

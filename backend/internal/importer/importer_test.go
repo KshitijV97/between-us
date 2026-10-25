@@ -8,14 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store/sqlite"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/synth"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/tenancy"
+	"github.com/kshitijv97/between-us/backend/internal/ingest"
+	"github.com/kshitijv97/between-us/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/store/sqlite"
+	"github.com/kshitijv97/between-us/backend/internal/synth"
+	"github.com/kshitijv97/between-us/backend/internal/tenancy"
 
-	_ "github.com/kshitijv97/chat-analyzer/backend/internal/ingest/telegram"
-	_ "github.com/kshitijv97/chat-analyzer/backend/internal/ingest/whatsapp"
+	_ "github.com/kshitijv97/between-us/backend/internal/ingest/telegram"
+	_ "github.com/kshitijv97/between-us/backend/internal/ingest/whatsapp"
 )
 
 // env is a migrated SQLite store with a local tenant scope.

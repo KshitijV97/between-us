@@ -1,4 +1,4 @@
-# Chat Analyzer — Architecture
+# Between Us — Architecture
 
 | Field | Value |
 |---|---|
@@ -51,8 +51,8 @@
 flowchart TB
     user(["End user<br/>browser or PWA"])
     op(["Operator / admin"])
-    subgraph SYS["Chat Analyzer"]
-        core["Chat Analyzer system<br/>import, analytics, insights, Q&A"]
+    subgraph SYS["Between Us"]
+        core["Between Us system<br/>import, analytics, insights, Q&A"]
     end
     wa["WhatsApp app<br/>export .txt / .zip"]
     tg["Telegram Desktop<br/>export result.json"]
@@ -81,7 +81,7 @@ flowchart LR
     subgraph Client["Client device"]
         spa["Web SPA<br/>React + TypeScript + Vite<br/>TanStack Query, Recharts"]
     end
-    subgraph Server["chatanalyzer binary (Go)"]
+    subgraph Server["betweenus binary (Go)"]
         http["HTTP API<br/>/api/v1 REST + SSE<br/>OpenAPI 3.1"]
         static["Static file server<br/>embedded SPA, local mode"]
         workers["Job workers<br/>inprocess or pump"]
@@ -116,7 +116,7 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph cmd["cmd/chatanalyzer"]
+    subgraph cmd["cmd/betweenus"]
         main["main.go<br/>subcommand dispatch, wiring"]
     end
     subgraph edge["Edge"]
@@ -179,7 +179,7 @@ flowchart TB
 
 | Package | Responsibility | Key requirements |
 |---|---|---|
-| `cmd/chatanalyzer` | Parses subcommands (`serve`, `migrate`, `import`, `worker`, `version`), loads config, builds the dependency graph explicitly (no DI framework). | §12 |
+| `cmd/betweenus` | Parses subcommands (`serve`, `migrate`, `import`, `worker`, `version`), loads config, builds the dependency graph explicitly (no DI framework). | §12 |
 | `internal/config` | Loads `CA_*` env vars and optional `config.yaml`; validates; exposes typed `Config`. Secrets never logged. | SEC-005 |
 | `internal/httpapi` | Route table (`GET /api/v1/chats/{id}/metrics`), handlers, middleware chain, problem+json errors, SSE writer, OpenAPI conformance tests. Also exports `Handler()` used by the Vercel adapter. | FR-API-001..003 |
 | `internal/auth` | `AuthProvider` implementations; session cookies (local) and JWT/JWKS verification (supabase, oidc); Argon2id hashing; TOTP (P2). | MT-007, MT-008, SEC-008 |
@@ -203,7 +203,7 @@ flowchart TB
 ### 4.2 Dependency rules
 
 - `domain` packages depend on `store`/`llm` **interfaces**, never on concrete drivers.
-- Only `cmd/chatanalyzer` imports concrete implementations (`store/sqlite`, `store/postgres`, `llm/ollama`…).
+- Only `cmd/betweenus` imports concrete implementations (`store/sqlite`, `store/postgres`, `llm/ollama`…).
 - `httpapi` contains no business logic beyond validation and mapping.
 - A `go vet`-style import-boundary check (e.g. `go-arch-lint` or a small test using `go/packages`) enforces this in CI.
 
@@ -238,13 +238,13 @@ flowchart TB
 ## 6. Repository layout
 
 ```text
-chat-analyzer/
+between-us/
 ├── README.md                     # central entry point, links every doc
 ├── docs/                         # all .md documentation (this folder)
 │   ├── adr/                      # architecture decision records
 │   └── parsers/                  # export format specifications
 ├── backend/                      # Go module
-│   ├── cmd/chatanalyzer/         # main package and subcommands
+│   ├── cmd/betweenus/         # main package and subcommands
 │   ├── internal/
 │   │   ├── config/  httpapi/  auth/  tenancy/  policy/
 │   │   ├── ingest/{detect,whatsapp,telegram}/
@@ -417,7 +417,7 @@ sequenceDiagram
     end
 ```
 
-With `CA_LLM_PROVIDER=none` the same path produces deterministic insights (FR-AI-007).
+With `BU_LLM_PROVIDER=none` the same path produces deterministic insights (FR-AI-007).
 
 ### 8.4 Q&A with tool routing and SSE (FR-AI-005)
 
@@ -641,8 +641,8 @@ stateDiagram-v2
 |---|---|---|
 | Where | `serve` or `worker` process | Inside `/api/v1/jobs/pump` requests |
 | Trigger | Poll every 500 ms + `LISTEN/NOTIFY` (Postgres) | Client polling during active imports; synthetic check (every 60 s) and the daily Vercel cron for background kinds such as the outbox and retention |
-| Concurrency | `CA_JOBS_CONCURRENCY` workers, max per tenant `CA_JOBS_PER_TENANT` | One job per request; fairness by oldest-per-tenant claim |
-| Time limit | none (per-step timeout) | `CA_PUMP_BUDGET_MS` (default 20 s) below the platform limit |
+| Concurrency | `BU_JOBS_CONCURRENCY` workers, max per tenant `BU_JOBS_PER_TENANT` | One job per request; fairness by oldest-per-tenant claim |
+| Time limit | none (per-step timeout) | `BU_PUMP_BUDGET_MS` (default 20 s) below the platform limit |
 | Leases | `lease_until` renewed per step | Same; expired leases are reclaimed |
 
 ## 11. Deployment profiles
@@ -655,8 +655,8 @@ Details, limits and step-by-step guides: [07-deployment.md](07-deployment.md).
 flowchart LR
     subgraph Laptop["User laptop"]
         br["Browser<br/>localhost:7420"]
-        bin["chatanalyzer serve<br/>API + embedded SPA + inprocess jobs"]
-        file[("chatanalyzer.db<br/>SQLite file")]
+        bin["betweenus serve<br/>API + embedded SPA + inprocess jobs"]
+        file[("betweenus.db<br/>SQLite file")]
         oll["Ollama optional<br/>localhost:11434"]
     end
     br --> bin --> file
@@ -670,7 +670,7 @@ Zero external services; telemetry to stdout or disabled (NFR-OBS-008); no outbou
 ```mermaid
 flowchart LR
     subgraph Compose["docker compose"]
-        app["chatanalyzer<br/>serve"]
+        app["betweenus<br/>serve"]
         pg[("postgres 16<br/>+ pgvector")]
         lgtm["grafana/otel-lgtm<br/>Grafana, Loki, Tempo, Prometheus"]
         mp["Mailpit<br/>SMTP + web UI"]
@@ -717,7 +717,7 @@ flowchart TB
     fn -.-> llmh
 ```
 
-The same `httpapi.Handler()` serves both the Vercel adapter (`backend/vercel/api/index.go`) and `chatanalyzer serve`.
+The same `httpapi.Handler()` serves both the Vercel adapter (`backend/vercel/api/index.go`) and `betweenus serve`.
 
 ## 12. Configuration model
 
@@ -725,39 +725,39 @@ The same `httpapi.Handler()` serves both the Vercel adapter (`backend/vercel/api
 
 | Variable | Default | Description |
 |---|---|---|
-| `CA_PROFILE` | `local` | Preset (`local`, `local-full`, `cloud-free`, `cloud-free-container`) that sets safe defaults for everything below. |
-| `CA_MODE` | from profile | `local` (single implicit tenant/user) or `hosted` (multi-tenant). |
-| `CA_HTTP_ADDR` | `127.0.0.1:7420` | Listen address for `serve`. Local binds loopback only. |
-| `CA_PUBLIC_BASE_URL` | `http://127.0.0.1:7420` | Public URL for links in notifications and OIDC callbacks. |
-| `CA_DB_DRIVER` | `sqlite` | `sqlite` or `postgres`. |
-| `CA_DB_DSN` | `file:chatanalyzer.db?_pragma=journal_mode(WAL)` | Driver DSN. Postgres: use the pooler URL on Supabase. |
-| `CA_DB_MAX_CONNS` | `5` | Pool size; keep low on free tiers. |
-| `CA_MIGRATE_ON_START` | `true` | Run goose migrations at startup. |
-| `CA_AUTH_PROVIDER` | `local` | `local`, `supabase`, `oidc`. |
-| `CA_SUPABASE_URL` / `CA_SUPABASE_JWKS_URL` | — | JWKS source for JWT verification. |
-| `CA_OIDC_ISSUER`, `CA_OIDC_CLIENT_ID`, `CA_OIDC_CLIENT_SECRET` | — | Generic OIDC. |
-| `CA_SESSION_SECRET` | generated on first run (local) | HMAC key for session cookies; required in hosted mode. |
-| `CA_LLM_PROVIDER` | `none` | `none`, `ollama`, `openai-compatible`, `anthropic`. |
-| `CA_LLM_BASE_URL` | `http://localhost:11434` | Provider endpoint. |
-| `CA_LLM_MODEL` | — | Chat model name. |
-| `CA_LLM_API_KEY` | — | Secret for hosted providers. |
-| `CA_EMBED_PROVIDER` / `CA_EMBED_MODEL` | `none` | Embeddings; `none` means FTS-only search. |
-| `CA_LLM_REDACT_PII` | `true` | Redact PII before hosted LLM calls (PRV-003). |
-| `CA_EGRESS_ALLOWLIST` | derived | Hosts the process may call; empty in pure local mode (PRV-001). |
-| `CA_JOBS_MODE` | `inprocess` | `inprocess` or `pump`. |
-| `CA_JOBS_CONCURRENCY` / `CA_JOBS_PER_TENANT` | `4` / `2` | Worker limits. |
-| `CA_PUMP_BUDGET_MS` | `20000` | Max work per pump request (well under Vercel Hobby's 300 s cap). |
-| `CA_UPLOAD_MAX_BYTES` | `524288000` | Upload cap (500 MB). |
-| `CA_KEEP_RAW_EXPORTS` | `false` | FR-ING-014 opt-in. |
-| `CA_OTEL_ENABLED` | `false` (local) | Enable OTLP export. |
+| `BU_PROFILE` | `local` | Preset (`local`, `local-full`, `cloud-free`, `cloud-free-container`) that sets safe defaults for everything below. |
+| `BU_MODE` | from profile | `local` (single implicit tenant/user) or `hosted` (multi-tenant). |
+| `BU_HTTP_ADDR` | `127.0.0.1:7420` | Listen address for `serve`. Local binds loopback only. |
+| `BU_PUBLIC_BASE_URL` | `http://127.0.0.1:7420` | Public URL for links in notifications and OIDC callbacks. |
+| `BU_DB_DRIVER` | `sqlite` | `sqlite` or `postgres`. |
+| `BU_DB_DSN` | `file:betweenus.db?_pragma=journal_mode(WAL)` | Driver DSN. Postgres: use the pooler URL on Supabase. |
+| `BU_DB_MAX_CONNS` | `5` | Pool size; keep low on free tiers. |
+| `BU_MIGRATE_ON_START` | `true` | Run goose migrations at startup. |
+| `BU_AUTH_PROVIDER` | `local` | `local`, `supabase`, `oidc`. |
+| `BU_SUPABASE_URL` / `BU_SUPABASE_JWKS_URL` | — | JWKS source for JWT verification. |
+| `BU_OIDC_ISSUER`, `BU_OIDC_CLIENT_ID`, `BU_OIDC_CLIENT_SECRET` | — | Generic OIDC. |
+| `BU_SESSION_SECRET` | generated on first run (local) | HMAC key for session cookies; required in hosted mode. |
+| `BU_LLM_PROVIDER` | `none` | `none`, `ollama`, `openai-compatible`, `anthropic`. |
+| `BU_LLM_BASE_URL` | `http://localhost:11434` | Provider endpoint. |
+| `BU_LLM_MODEL` | — | Chat model name. |
+| `BU_LLM_API_KEY` | — | Secret for hosted providers. |
+| `BU_EMBED_PROVIDER` / `BU_EMBED_MODEL` | `none` | Embeddings; `none` means FTS-only search. |
+| `BU_LLM_REDACT_PII` | `true` | Redact PII before hosted LLM calls (PRV-003). |
+| `BU_EGRESS_ALLOWLIST` | derived | Hosts the process may call; empty in pure local mode (PRV-001). |
+| `BU_JOBS_MODE` | `inprocess` | `inprocess` or `pump`. |
+| `BU_JOBS_CONCURRENCY` / `BU_JOBS_PER_TENANT` | `4` / `2` | Worker limits. |
+| `BU_PUMP_BUDGET_MS` | `20000` | Max work per pump request (well under Vercel Hobby's 300 s cap). |
+| `BU_UPLOAD_MAX_BYTES` | `524288000` | Upload cap (500 MB). |
+| `BU_KEEP_RAW_EXPORTS` | `false` | FR-ING-014 opt-in. |
+| `BU_OTEL_ENABLED` | `false` (local) | Enable OTLP export. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME` | — | Standard OTel variables (not prefixed, per spec). |
-| `CA_METRICS_ADDR` | — | Optional separate Prometheus `/metrics` listener. |
-| `CA_LOG_LEVEL` / `CA_LOG_FORMAT` | `info` / `json` | `text` for local dev. |
-| `CA_NOTIFY_CHANNELS` | `log` | Comma list of channels: `email,push,telegram,sms,log`; `CA_EMAIL_TRANSPORT` picks `smtp` or `api` (see [09-notifications.md](09-notifications.md)). |
-| `CA_SMTP_HOST`, `CA_SMTP_PORT`, `CA_SMTP_USERNAME`, `CA_SMTP_PASSWORD`, `CA_SMTP_TLS`, `CA_EMAIL_FROM` | — | SMTP adapter. |
-| `CA_NTFY_URL`, `CA_TELEGRAM_BOT_TOKEN`, `CA_SMS_GATEWAY_URL` | — | Other channels (P2/P3); ntfy topics are generated per user. |
-| `CA_QUOTA_CHATS`, `CA_QUOTA_MESSAGES`, `CA_QUOTA_LLM_TOKENS_MONTH` | `5`, `500000`, `2000000` | Default per-tenant quotas (MT-005). |
-| `CA_RATE_LIMIT_RPS` | `10` | Per-tenant request rate. |
+| `BU_METRICS_ADDR` | — | Optional separate Prometheus `/metrics` listener. |
+| `BU_LOG_LEVEL` / `BU_LOG_FORMAT` | `info` / `json` | `text` for local dev. |
+| `BU_NOTIFY_CHANNELS` | `log` | Comma list of channels: `email,push,telegram,sms,log`; `BU_EMAIL_TRANSPORT` picks `smtp` or `api` (see [09-notifications.md](09-notifications.md)). |
+| `BU_SMTP_HOST`, `BU_SMTP_PORT`, `BU_SMTP_USERNAME`, `BU_SMTP_PASSWORD`, `BU_SMTP_TLS`, `BU_EMAIL_FROM` | — | SMTP adapter. |
+| `BU_NTFY_URL`, `BU_TELEGRAM_BOT_TOKEN`, `BU_SMS_GATEWAY_URL` | — | Other channels (P2/P3); ntfy topics are generated per user. |
+| `BU_QUOTA_CHATS`, `BU_QUOTA_MESSAGES`, `BU_QUOTA_LLM_TOKENS_MONTH` | `5`, `500000`, `2000000` | Default per-tenant quotas (MT-005). |
+| `BU_RATE_LIMIT_RPS` | `10` | Per-tenant request rate. |
 
 ## 13. Cross-cutting concerns
 
@@ -780,5 +780,5 @@ The same `httpapi.Handler()` serves both the Vercel adapter (`backend/vercel/api
 | Media analysis (P3) | New job kinds (`media.caption`, `media.transcribe`) producing `message_events`/annotations consumed by analytics and insights. |
 | New metric | Add to the analytics metric registry with ID `M-0xx`, rollup fields (if additive) or sketch, catalog entry in [04-metrics-catalog.md](04-metrics-catalog.md). |
 | New LLM provider | Implement `llm.Provider` (+ `Embedder`), add to egress allow-list rules and docs. |
-| New notification channel | Implement `notify.Notifier`; register via `CA_NOTIFY_CHANNELS`. |
+| New notification channel | Implement `notify.Notifier`; register via `BU_NOTIFY_CHANNELS`. |
 | New auth provider | Implement `auth.Provider`. |

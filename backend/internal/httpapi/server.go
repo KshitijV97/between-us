@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
+	"github.com/kshitijv97/between-us/backend/internal/config"
 )
 
 // Server timeouts. Header and idle limits protect against slow-loris clients;

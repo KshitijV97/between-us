@@ -9,7 +9,7 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-const apiTarget = process.env['CA_DEV_API_URL'] ?? 'http://127.0.0.1:7420';
+const apiTarget = process.env['BU_DEV_API_URL'] ?? 'http://127.0.0.1:7420';
 
 export default defineConfig({
   plugins: [react()],

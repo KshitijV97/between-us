@@ -13,8 +13,8 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
+	"github.com/kshitijv97/between-us/backend/internal/buildinfo"
+	"github.com/kshitijv97/between-us/backend/internal/config"
 )
 
 // ctxKey is unexported so no other package can collide with or forge keys.
@@ -37,7 +37,7 @@ func NewLogger(w io.Writer, cfg config.Config) *slog.Logger {
 	h = contextHandler{h}
 	bi := buildinfo.Get()
 	return slog.New(h).With(
-		slog.String("service.name", "chatanalyzer"),
+		slog.String("service.name", "between-us"),
 		slog.String("service.version", bi.Version),
 		slog.String("deployment.environment.name", cfg.Env),
 	)

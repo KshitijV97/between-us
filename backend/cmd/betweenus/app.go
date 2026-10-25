@@ -10,15 +10,15 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store/sqlite"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/telemetry"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/tenancy"
+	"github.com/kshitijv97/between-us/backend/internal/config"
+	"github.com/kshitijv97/between-us/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/store/sqlite"
+	"github.com/kshitijv97/between-us/backend/internal/telemetry"
+	"github.com/kshitijv97/between-us/backend/internal/tenancy"
 )
 
 // errPostgresNotYet is returned until the Postgres store lands in M5.
-var errPostgresNotYet = errors.New("the postgres store arrives in milestone M5; use CA_DB_DRIVER=sqlite for now")
+var errPostgresNotYet = errors.New("the postgres store arrives in milestone M5; use BU_DB_DRIVER=sqlite for now")
 
 // app bundles what CLI commands share: configuration, logger and store.
 type app struct {
@@ -35,7 +35,7 @@ func openApp(ctx context.Context, stderr io.Writer, migrate bool) (*app, error) 
 		return nil, fmt.Errorf("configuration error:\n%w", err)
 	}
 	// CLI output is for people: progress logs only appear when asked for.
-	if _, set := os.LookupEnv("CA_LOG_LEVEL"); !set {
+	if _, set := os.LookupEnv("BU_LOG_LEVEL"); !set {
 		cfg.LogLevel = slog.LevelWarn
 	}
 	log := telemetry.NewLogger(stderr, cfg)
@@ -65,7 +65,7 @@ func openStore(ctx context.Context, cfg config.Config) (store.Store, error) {
 	case "postgres":
 		return nil, errPostgresNotYet
 	default:
-		return nil, fmt.Errorf("unsupported CA_DB_DRIVER %q", cfg.DB.Driver)
+		return nil, fmt.Errorf("unsupported BU_DB_DRIVER %q", cfg.DB.Driver)
 	}
 }
 

@@ -9,6 +9,14 @@ For a feature-by-feature view, including what is planned, see [FEATURES.md](FEAT
 
 ## [Unreleased]
 
+### Rename (2026-10-25)
+
+#### Changed
+
+- The project is now **Between Us** (previously Chat Analyzer): repository `between-us`, Go module
+  `github.com/kshitijv97/between-us/backend`, command `betweenus`, settings prefix `BU_` (was `CA_`), data
+  folder `betweenus`, database file `betweenus.db`, telemetry service name `between-us`, metric prefix `bu_`.
+
 ### M1 — Import (2026-10-25)
 
 #### Added
@@ -25,8 +33,8 @@ For a feature-by-feature view, including what is planned, see [FEATURES.md](FEAT
   tenant isolation.
 - Import pipeline: preview then import, participant mapping, timezone-independent de-duplication, incremental
   re-import, rollback of failed or cancelled imports.
-- CLI: `chatanalyzer import` (`-dry-run`, `-tz`, `-me`, `-participants`, `-date-order`, `-chat`,
-  `-telegram-chat`, `-entry`, `-json`), `chatanalyzer chats [delete <id>]`, `chatanalyzer migrate`.
+- CLI: `betweenus import` (`-dry-run`, `-tz`, `-me`, `-participants`, `-date-order`, `-chat`,
+  `-telegram-chat`, `-entry`, `-json`), `betweenus chats [delete <id>]`, `betweenus migrate`.
 - `serve` opens and migrates the database and reports it in `/readyz`.
 - Synthetic chat generator (`cmd/synthchat`), `make demo`, CI import smoke test, golden fixtures and fuzz targets.
 
@@ -40,10 +48,6 @@ For a feature-by-feature view, including what is planned, see [FEATURES.md](FEAT
   Telegram calls without an actor).
 - Re-uploading an identical file is now reported as "nothing to do" instead of an error.
 
-#### Changed
-
-- Go module path is `github.com/kshitijv97/chat-analyzer/backend`.
-
 #### Known limitations
 
 - A WhatsApp message edited between two exports is imported twice (exports carry no message IDs).
@@ -54,7 +58,7 @@ For a feature-by-feature view, including what is planned, see [FEATURES.md](FEAT
 
 #### Added
 
-- Go backend skeleton: `chatanalyzer serve | version`, `CA_*` configuration with deployment profiles, structured
+- Go backend skeleton: `betweenus serve | version`, `CA_*` configuration with deployment profiles, structured
   logging with request IDs, health/readiness/version endpoints, RFC 9457 problem errors, security headers,
   panic recovery, graceful shutdown, embedded single-page app.
 - React + TypeScript + Vite web shell with typed API client, strict linting, tests and a bundle-size budget.

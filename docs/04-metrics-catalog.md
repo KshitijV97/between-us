@@ -1,4 +1,4 @@
-# Chat Analyzer — Metrics Catalog
+# Between Us — Metrics Catalog
 
 | Field | Value |
 |---|---|
@@ -703,7 +703,7 @@ rollup values.
 ### 9.3 Lexicon extension format
 
 Lexicons are plain files embedded in the binary (`backend/internal/analytics/lexicons/`) and overridable by
-a directory set in `CA_LEXICON_DIR`:
+a directory set in `BU_LEXICON_DIR`:
 
 ```text
 lexicons/

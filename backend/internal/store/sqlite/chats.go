@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/store"
 )
 
 // deleteBatch bounds each DELETE so a large chat is purged in short write

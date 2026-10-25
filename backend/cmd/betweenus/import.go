@@ -19,18 +19,18 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/importer"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest/archive"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/importer"
+	"github.com/kshitijv97/between-us/backend/internal/ingest"
+	"github.com/kshitijv97/between-us/backend/internal/ingest/archive"
+	"github.com/kshitijv97/between-us/backend/internal/store"
 
 	// Register parsers with the ingest registry.
-	_ "github.com/kshitijv97/chat-analyzer/backend/internal/ingest/telegram"
-	_ "github.com/kshitijv97/chat-analyzer/backend/internal/ingest/whatsapp"
+	_ "github.com/kshitijv97/between-us/backend/internal/ingest/telegram"
+	_ "github.com/kshitijv97/between-us/backend/internal/ingest/whatsapp"
 )
 
-// importUsage documents `chatanalyzer import` (FR-ING-001).
-const importUsage = `Usage: chatanalyzer import [flags] <export file>
+// importUsage documents `betweenus import` (FR-ING-001).
+const importUsage = `Usage: betweenus import [flags] <export file>
 
 Imports a WhatsApp export (.txt or .zip) or a Telegram Desktop export (result.json,
 or a zip of the export folder). The file itself is not kept; only messages are stored.
@@ -38,13 +38,13 @@ or a zip of the export folder). The file itself is not kept; only messages are s
 Flags:
 `
 
-// importCmd implements `chatanalyzer import`.
+// importCmd implements `betweenus import`.
 func importCmd(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("import", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() { fmt.Fprint(stderr, importUsage); fs.PrintDefaults() }
 	tz := fs.String("tz", "", "IANA timezone of the phone that exported the chat (default: this computer's)")
-	chatID := fs.String("chat", "", "add to an existing chat (ID from `chatanalyzer chats`) instead of creating one")
+	chatID := fs.String("chat", "", "add to an existing chat (ID from `betweenus chats`) instead of creating one")
 	title := fs.String("title", "", "title for a new chat (default: from the export)")
 	me := fs.String("me", "", "sender key that is you (see the participant list from -dry-run)")
 	participants := fs.String("participants", "", "comma-separated sender keys to analyse when the export has more than two senders")
@@ -302,7 +302,7 @@ func printJSON(w io.Writer, v any) int {
 	return exitOK
 }
 
-// chatsCmd implements `chatanalyzer chats [list|delete <id>]`.
+// chatsCmd implements `betweenus chats [list|delete <id>]`.
 func chatsCmd(args []string, stdout, stderr io.Writer) int {
 	ctx := context.Background()
 	sub := "list"
@@ -329,7 +329,7 @@ func chatsCmd(args []string, stdout, stderr io.Writer) int {
 			return exitError
 		}
 		if len(chats) == 0 {
-			fmt.Fprintln(stdout, "No chats yet. Import one with: chatanalyzer import <export file>")
+			fmt.Fprintln(stdout, "No chats yet. Import one with: betweenus import <export file>")
 			return exitOK
 		}
 		tw := tabwriter.NewWriter(stdout, 0, 0, 2, ' ', 0)
@@ -343,7 +343,7 @@ func chatsCmd(args []string, stdout, stderr io.Writer) int {
 		return exitOK
 	case "delete":
 		if len(args) != 1 {
-			fmt.Fprintln(stderr, "usage: chatanalyzer chats delete <chat id>")
+			fmt.Fprintln(stderr, "usage: betweenus chats delete <chat id>")
 			return exitUsage
 		}
 		id, err := uuid.Parse(args[0])
@@ -378,7 +378,7 @@ func period(c store.Chat) string {
 	return c.FirstMessageAt.In(loc).Format(time.DateOnly) + " → " + c.LastMessageAt.In(loc).Format(time.DateOnly)
 }
 
-// migrateCmd implements `chatanalyzer migrate` (NFR-REL-004).
+// migrateCmd implements `betweenus migrate` (NFR-REL-004).
 func migrateCmd(stderr io.Writer) int {
 	a, err := openApp(context.Background(), stderr, true)
 	if err != nil {

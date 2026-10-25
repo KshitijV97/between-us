@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/telemetry"
+	"github.com/kshitijv97/between-us/backend/internal/telemetry"
 )
 
 // Problem is an RFC 9457 "problem details" error body. Every API error uses it

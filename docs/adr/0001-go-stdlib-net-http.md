@@ -18,7 +18,7 @@ patterns to `http.ServeMux`, removing the main reason to adopt a router framewor
 
 Write the backend in Go (≥ 1.22) using only `net/http` for routing and middleware, `log/slog` for logging,
 and small, well-maintained libraries where the standard library has no answer (pgx, modernc SQLite, goose,
-OpenTelemetry). One binary `chatanalyzer` exposes subcommands `serve`, `migrate`, `import`, `worker`, `version`.
+OpenTelemetry). One binary `betweenus` exposes subcommands `serve`, `migrate`, `import`, `worker`, `version`.
 `httpapi.Handler()` returns an `http.Handler` used by both `serve` and the Vercel adapter.
 
 ## Alternatives considered

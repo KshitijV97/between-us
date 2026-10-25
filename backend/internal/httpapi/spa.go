@@ -70,10 +70,10 @@ func serveIndex(w http.ResponseWriter, r *http.Request, ui fs.FS) {
 }
 
 const notBuiltPage = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Chat Analyzer</title>
+<html lang="en"><head><meta charset="utf-8"><title>Between Us</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"></head>
 <body style="font-family: system-ui, sans-serif; max-width: 40rem; margin: 4rem auto; padding: 0 1rem">
-<h1>Chat Analyzer API is running</h1>
+<h1>Between Us API is running</h1>
 <p>The web UI is not embedded in this build. Run <code>make build</code> to bundle it,
 or <code>make dev</code> to use the Vite dev server with hot reload.</p>
 <p>Health: <a href="/healthz">/healthz</a> · Version: <a href="/version">/version</a></p>

@@ -18,7 +18,7 @@ export function SystemStatus() {
   if (error) {
     return (
       <p role="alert" className="status status--error">
-        Cannot reach the API: {error.message}. Is <code>chatanalyzer serve</code> running?
+        Cannot reach the API: {error.message}. Is <code>betweenus serve</code> running?
       </p>
     );
   }

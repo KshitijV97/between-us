@@ -9,7 +9,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/telemetry"
+	"github.com/kshitijv97/between-us/backend/internal/telemetry"
 )
 
 // headerRequestID is accepted from trusted proxies and always echoed back so a

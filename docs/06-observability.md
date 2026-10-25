@@ -1,4 +1,4 @@
-# Chat Analyzer — Observability, Monitoring and Alerting
+# Between Us — Observability, Monitoring and Alerting
 
 | Field | Value |
 |---|---|
@@ -60,7 +60,7 @@ flowchart LR
     subgraph Browser["Browser - opt-in only"]
         web["Web UI<br/>OTel Web SDK"]
     end
-    subgraph App["chatanalyzer binary"]
+    subgraph App["betweenus binary"]
         mw["otelhttp middleware"]
         biz["Handlers, jobs,<br/>parsers, LLM client"]
         slog["slog JSON handler<br/>plus otelslog bridge"]
@@ -116,7 +116,7 @@ flowchart LR
 
 ### 3.2 Bootstrap
 
-All setup lives in `backend/internal/telemetry` and is called once from `cmd/chatanalyzer`:
+All setup lives in `backend/internal/telemetry` and is called once from `cmd/betweenus`:
 
 ```go
 // Package telemetry wires OpenTelemetry providers for the whole process.
@@ -128,10 +128,10 @@ func Setup(ctx context.Context, cfg Config) (shutdown func(context.Context) erro
 
 - **Exporter selection** follows the standard OTel env vars (`OTEL_EXPORTER_OTLP_ENDPOINT`,
   `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`, `OTEL_TRACES_SAMPLER`…), gated by
-  `CA_OTEL_ENABLED` (default `false` in `local`, `true` in `cloud-free`). HTTP/protobuf is used everywhere: it
+  `BU_OTEL_ENABLED` (default `false` in `local`, `true` in `cloud-free`). HTTP/protobuf is used everywhere: it
   works through every proxy and free tier and avoids a gRPC dependency in the binary.
 - **Batching:** `BatchSpanProcessor` (max queue 2048, export timeout 5 s); periodic metric reader every 30 s
-  in-process, **10 s plus force-flush at the end of each pump tick** in serverless mode (`CA_JOBS_MODE=pump`).
+  in-process, **10 s plus force-flush at the end of each pump tick** in serverless mode (`BU_JOBS_MODE=pump`).
 - **Views** (cardinality control): `http.server.request.duration` keeps only `http.route` and a derived
   `http.response.status_class` (`2xx`/`3xx`/`4xx`/`5xx`); explicit histogram buckets
   `[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 0.8, 1, 2.5, 5, 10]` s.
@@ -141,12 +141,12 @@ func Setup(ctx context.Context, cfg Config) (shutdown func(context.Context) erro
 
 | Attribute | Example | Source |
 |---|---|---|
-| `service.name` | `chat-analyzer` | constant (override `OTEL_SERVICE_NAME`) |
+| `service.name` | `between-us` | constant (override `OTEL_SERVICE_NAME`) |
 | `service.version` | `0.3.1` | ldflags |
 | `service.instance.id` | random UUID per process | generated |
-| `deployment.environment.name` | `local`, `staging`, `production` | `CA_ENV` |
-| `ca.profile` | `local`, `local-full`, `cloud-free` | `CA_PROFILE` |
-| `ca.jobs.mode` | `inprocess`, `pump` | `CA_JOBS_MODE` |
+| `deployment.environment.name` | `local`, `staging`, `production` | `BU_ENV` |
+| `bu.profile` | `local`, `local-full`, `cloud-free` | `BU_PROFILE` |
+| `bu.jobs.mode` | `inprocess`, `pump` | `BU_JOBS_MODE` |
 | `vcs.ref.head.revision` | git SHA | ldflags |
 | `cloud.provider` / `cloud.platform` | `vercel` / `render` / `koyeb` | detected from platform env vars |
 
@@ -155,7 +155,7 @@ func Setup(ctx context.Context, cfg Config) (shutdown func(context.Context) erro
 | Profile | Sampler | Notes |
 |---|---|---|
 | `local`, `local-full` | `parentbased_always_on` | Volume is tiny. |
-| `cloud-free` | Custom `ca_priority` sampler: **100%** for root spans `job.run *`, `import.*`, `llm.*`, `notify.*`; **20%** (`CA_OTEL_SAMPLE_RATIO`) for HTTP requests; always honours a sampled parent. | Keeps every expensive/rare operation while staying far below the 50 GB/month trace allowance. Errors are always visible through metrics and logs even when the trace was not sampled. |
+| `cloud-free` | Custom `bu_priority` sampler: **100%** for root spans `job.run *`, `import.*`, `llm.*`, `notify.*`; **20%** (`BU_OTEL_SAMPLE_RATIO`) for HTTP requests; always honours a sampled parent. | Keeps every expensive/rare operation while staying far below the 50 GB/month trace allowance. Errors are always visible through metrics and logs even when the trace was not sampled. |
 
 Tail-based sampling (keep all error traces) requires an OTel Collector; it is documented as an option for
 self-hosted operators but not used on the free profile, which has no always-on process for a collector.
@@ -168,17 +168,17 @@ Names are low-cardinality and follow OTel semantic conventions where they exist.
 
 | Area | Span name | Kind | Key attributes (allow-listed) |
 |---|---|---|---|
-| HTTP server | `{METHOD} {http.route}` e.g. `GET /api/v1/chats/{chatID}/metrics` | Server | `http.request.method`, `http.route`, `http.response.status_code`, `url.scheme`, `ca.tenant.hash` |
+| HTTP server | `{METHOD} {http.route}` e.g. `GET /api/v1/chats/{chatID}/metrics` | Server | `http.request.method`, `http.route`, `http.response.status_code`, `url.scheme`, `bu.tenant.hash` |
 | HTTP client | `{METHOD}` | Client | `server.address`, `http.response.status_code` |
-| DB | `{db.operation.name} {db.collection.name}` e.g. `SELECT messages` | Client | `db.system.name`, `db.operation.name`, `db.collection.name`, `ca.db.rows` — **never** `db.query.text` with literals; parameterised text only |
-| Import pipeline | `import.detect`, `import.parse`, `import.normalize`, `import.store`, `import.rollup` | Internal | `ca.import.platform`, `ca.import.format`, `ca.import.lines`, `ca.import.messages`, `ca.import.skipped`, `ca.import.bytes` |
-| Jobs | `job.run {job.type}` e.g. `job.run rollup.rebuild` | Consumer | `ca.job.type`, `ca.job.attempt`, `ca.job.outcome`, `ca.job.queue_delay_ms` |
-| Pump tick | `job.pump` | Internal | `ca.pump.budget_ms`, `ca.pump.jobs_processed` |
-| Analytics | `analytics.query {window.kind}` | Internal | `ca.window.kind`, `ca.window.days`, `ca.cache.hit` |
-| LLM | `{gen_ai.operation.name} {gen_ai.request.model}` e.g. `chat llama3.1:8b` | Client | `gen_ai.provider.name`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `ca.ai.feature`, `ca.ai.prompt_version`, `ca.ai.cache.hit` |
-| Retrieval | `retrieval.search` | Internal | `ca.retrieval.mode` (`fts`/`vector`/`hybrid`), `ca.retrieval.k`, `ca.retrieval.hits` |
-| Citation validator | `ai.validate_citations` | Internal | `ca.ai.claims`, `ca.ai.claims_stripped` |
-| Notifications | `notify.send {channel}` | Client | `ca.notify.channel`, `ca.notify.event_type`, `ca.notify.attempt`, `ca.notify.outcome` |
+| DB | `{db.operation.name} {db.collection.name}` e.g. `SELECT messages` | Client | `db.system.name`, `db.operation.name`, `db.collection.name`, `bu.db.rows` — **never** `db.query.text` with literals; parameterised text only |
+| Import pipeline | `import.detect`, `import.parse`, `import.normalize`, `import.store`, `import.rollup` | Internal | `bu.import.platform`, `bu.import.format`, `bu.import.lines`, `bu.import.messages`, `bu.import.skipped`, `bu.import.bytes` |
+| Jobs | `job.run {job.type}` e.g. `job.run rollup.rebuild` | Consumer | `bu.job.type`, `bu.job.attempt`, `bu.job.outcome`, `bu.job.queue_delay_ms` |
+| Pump tick | `job.pump` | Internal | `bu.pump.budget_ms`, `bu.pump.jobs_processed` |
+| Analytics | `analytics.query {window.kind}` | Internal | `bu.window.kind`, `bu.window.days`, `bu.cache.hit` |
+| LLM | `{gen_ai.operation.name} {gen_ai.request.model}` e.g. `chat llama3.1:8b` | Client | `gen_ai.provider.name`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `bu.ai.feature`, `bu.ai.prompt_version`, `bu.ai.cache.hit` |
+| Retrieval | `retrieval.search` | Internal | `bu.retrieval.mode` (`fts`/`vector`/`hybrid`), `bu.retrieval.k`, `bu.retrieval.hits` |
+| Citation validator | `ai.validate_citations` | Internal | `bu.ai.claims`, `bu.ai.claims_stripped` |
+| Notifications | `notify.send {channel}` | Client | `bu.notify.channel`, `bu.notify.event_type`, `bu.notify.attempt`, `bu.notify.outcome` |
 
 ### 4.2 Attribute allow-list
 
@@ -196,7 +196,7 @@ is ignored), `db.query.parameter.*`, `url.query`, `http.request.header.*`, `user
 
 ### 4.3 Tenant correlation without leaking identity
 
-In hosted mode `ca.tenant.hash = hex(HMAC-SHA256(CA_TELEMETRY_SALT, tenant_id))[:16]`. Operators can find all
+In hosted mode `bu.tenant.hash = hex(HMAC-SHA256(BU_TELEMETRY_SALT, tenant_id))[:16]`. Operators can find all
 traces for a tenant (by computing the hash in the admin console) but a telemetry vendor cannot map hashes back to
 tenants. Locally, the raw tenant ID is used (it never leaves the machine).
 
@@ -212,9 +212,9 @@ translation with unit suffixes) is in the second column. All `ca.*` instruments 
 |---|---|---|---|---|
 | `http.server.request.duration` | `http_server_request_duration_seconds` | Histogram (s) | `http_route`, `http_response_status_class` | Rate, errors, duration per route; SLO-1, SLO-2 |
 | `http.server.active_requests` | `http_server_active_requests` | UpDownCounter | — | Saturation |
-| `ca.http.request.body.size` | `ca_http_request_body_size_bytes` | Histogram (By) | `http_route` (upload routes only) | Upload sizes vs limits |
-| `ca.ratelimit.rejected` | `ca_ratelimit_rejected_total` | Counter | `scope` (`ip`/`tenant`) | Abuse / noisy neighbour (MT-005, SEC-008) |
-| `ca.sse.streams.active` | `ca_sse_streams_active` | UpDownCounter | `feature` | Open Q&A/insight streams |
+| `bu.http.request.body.size` | `bu_http_request_body_size_bytes` | Histogram (By) | `http_route` (upload routes only) | Upload sizes vs limits |
+| `bu.ratelimit.rejected` | `bu_ratelimit_rejected_total` | Counter | `scope` (`ip`/`tenant`) | Abuse / noisy neighbour (MT-005, SEC-008) |
+| `bu.sse.streams.active` | `bu_sse_streams_active` | UpDownCounter | `feature` | Open Q&A/insight streams |
 
 ### 5.2 Runtime and process (USE)
 
@@ -224,7 +224,7 @@ translation with unit suffixes) is in the second column. All `ca.*` instruments 
 | `go.goroutine.count` | `go_goroutine_count` | Gauge | Leak detection |
 | `go.memory.gc.goal` | `go_memory_gc_goal_bytes` | Gauge | GC pressure |
 | `process.cpu.time` | `process_cpu_time_seconds_total` | Counter | CPU |
-| `ca.build.info` | `ca_build_info` | Gauge = 1 | `version`, `commit`, `go_version`, `profile` labels — deploy markers |
+| `bu.build.info` | `bu_build_info` | Gauge = 1 | `version`, `commit`, `go_version`, `profile` labels — deploy markers |
 
 ### 5.3 Database
 
@@ -232,22 +232,22 @@ translation with unit suffixes) is in the second column. All `ca.*` instruments 
 |---|---|---|---|---|
 | `db.client.operation.duration` | `db_client_operation_duration_seconds` | Histogram | `db_operation_name`, `db_collection_name` | Slow queries |
 | `db.client.connection.count` | `db_client_connection_count` | Gauge | `state` (`idle`/`used`) | Pool saturation (Aiven free caps at 20 connections) |
-| `ca.db.size` | `ca_db_size_bytes` | Gauge | — | Current DB size (`pg_database_size` / SQLite page count) |
-| `ca.db.size.limit` | `ca_db_size_limit_bytes` | Gauge | — | From `CA_DB_SIZE_LIMIT_BYTES` (e.g. 500 MB Supabase free) |
-| `ca.db.migration.version` | `ca_db_migration_version` | Gauge | — | Schema version vs binary expectation |
+| `bu.db.size` | `bu_db_size_bytes` | Gauge | — | Current DB size (`pg_database_size` / SQLite page count) |
+| `bu.db.size.limit` | `bu_db_size_limit_bytes` | Gauge | — | From `BU_DB_SIZE_LIMIT_BYTES` (e.g. 500 MB Supabase free) |
+| `bu.db.migration.version` | `bu_db_migration_version` | Gauge | — | Schema version vs binary expectation |
 
 ### 5.4 Jobs
 
 | OTel name | Prometheus name | Type | Labels | Purpose |
 |---|---|---|---|---|
-| `ca.jobs.enqueued` | `ca_jobs_enqueued_total` | Counter | `job_type` | Throughput |
-| `ca.jobs.completed` | `ca_jobs_completed_total` | Counter | `job_type`, `outcome` (`succeeded`/`retried`/`failed`/`dead`) | Failure rate |
-| `ca.jobs.duration` | `ca_jobs_duration_seconds` | Histogram | `job_type` | Runtime vs serverless budget |
-| `ca.jobs.pending` | `ca_jobs_pending` | Gauge | `job_type` | Backlog |
-| `ca.jobs.oldest_pending_age` | `ca_jobs_oldest_pending_age_seconds` | Gauge | — | Staleness (SLO-4) |
-| `ca.jobs.pump.ticks` | `ca_jobs_pump_ticks_total` | Counter | `trigger` (`client`/`cron`/`synthetic`) | Pump mode health |
+| `bu.jobs.enqueued` | `bu_jobs_enqueued_total` | Counter | `job_type` | Throughput |
+| `bu.jobs.completed` | `bu_jobs_completed_total` | Counter | `job_type`, `outcome` (`succeeded`/`retried`/`failed`/`dead`) | Failure rate |
+| `bu.jobs.duration` | `bu_jobs_duration_seconds` | Histogram | `job_type` | Runtime vs serverless budget |
+| `bu.jobs.pending` | `bu_jobs_pending` | Gauge | `job_type` | Backlog |
+| `bu.jobs.oldest_pending_age` | `bu_jobs_oldest_pending_age_seconds` | Gauge | — | Staleness (SLO-4) |
+| `bu.jobs.pump.ticks` | `bu_jobs_pump_ticks_total` | Counter | `trigger` (`client`/`cron`/`synthetic`) | Pump mode health |
 
-Gauges that require a DB query (`pending`, `oldest_pending_age`, `ca.db.size`, quota gauges) are produced by a
+Gauges that require a DB query (`pending`, `oldest_pending_age`, `bu.db.size`, quota gauges) are produced by a
 **sampler** that runs every 60 s in-process, or once per pump tick / `/readyz` probe in serverless mode, so they
 stay fresh even on hosts that scale to zero between requests.
 
@@ -255,40 +255,40 @@ stay fresh even on hosts that scale to zero between requests.
 
 | OTel name | Prometheus name | Type | Labels | Purpose |
 |---|---|---|---|---|
-| `ca.import.files` | `ca_import_files_total` | Counter | `platform`, `format`, `outcome` | K-1 import success rate |
-| `ca.import.messages` | `ca_import_messages_total` | Counter | `platform` | Volume |
-| `ca.import.lines_skipped` | `ca_import_lines_skipped_total` | Counter | `platform`, `reason` (enum) | Parser drift detection |
-| `ca.import.duration` | `ca_import_duration_seconds` | Histogram | `platform`, `stage` (`parse`/`store`/`rollup`) | K-2, NFR-PERF-002 |
-| `ca.import.file.size` | `ca_import_file_size_bytes` | Histogram | `platform` | Capacity planning |
-| `ca.import.format_detected` | `ca_import_format_detected_total` | Counter | `variant` (e.g. `wa_android_dmy_12h`) | Locale mix |
+| `bu.import.files` | `bu_import_files_total` | Counter | `platform`, `format`, `outcome` | K-1 import success rate |
+| `bu.import.messages` | `bu_import_messages_total` | Counter | `platform` | Volume |
+| `bu.import.lines_skipped` | `bu_import_lines_skipped_total` | Counter | `platform`, `reason` (enum) | Parser drift detection |
+| `bu.import.duration` | `bu_import_duration_seconds` | Histogram | `platform`, `stage` (`parse`/`store`/`rollup`) | K-2, NFR-PERF-002 |
+| `bu.import.file.size` | `bu_import_file_size_bytes` | Histogram | `platform` | Capacity planning |
+| `bu.import.format_detected` | `bu_import_format_detected_total` | Counter | `variant` (e.g. `wa_android_dmy_12h`) | Locale mix |
 
 ### 5.6 Analytics and AI
 
 | OTel name | Prometheus name | Type | Labels | Purpose |
 |---|---|---|---|---|
-| `ca.analytics.query.duration` | `ca_analytics_query_duration_seconds` | Histogram | `window_kind` | NFR-PERF-003 |
-| `ca.cache.requests` | `ca_cache_requests_total` | Counter | `cache` (`rollup`/`insight`/`summary`), `result` (`hit`/`miss`) | Cost efficiency |
+| `bu.analytics.query.duration` | `bu_analytics_query_duration_seconds` | Histogram | `window_kind` | NFR-PERF-003 |
+| `bu.cache.requests` | `bu_cache_requests_total` | Counter | `cache` (`rollup`/`insight`/`summary`), `result` (`hit`/`miss`) | Cost efficiency |
 | `gen_ai.client.operation.duration` | `gen_ai_client_operation_duration_seconds` | Histogram | `gen_ai_provider_name`, `gen_ai_request_model`, `gen_ai_operation_name` | LLM latency |
 | `gen_ai.client.token.usage` | `gen_ai_client_token_usage` | Histogram | `gen_ai_provider_name`, `gen_ai_request_model`, `gen_ai_token_type` | Token volume |
-| `ca.llm.requests` | `ca_llm_requests_total` | Counter | `provider`, `model`, `feature`, `outcome` (`ok`/`error`/`rate_limited`/`timeout`) | LLM error rate |
-| `ca.llm.cost` | `ca_llm_cost_usd_total` | Counter (USD, estimated from a price table) | `provider`, `model` | Budget alert (NFR-COST-003) |
-| `ca.llm.time_to_first_token` | `ca_llm_time_to_first_token_seconds` | Histogram | `provider`, `feature` | NFR-PERF-005 / SLO-5 |
-| `ca.ai.citations` | `ca_ai_citations_total` | Counter | `result` (`valid`/`stripped`/`answer_rejected`) | K-3 grounding quality |
-| `ca.retrieval.duration` | `ca_retrieval_duration_seconds` | Histogram | `mode` | Q&A latency breakdown |
+| `bu.llm.requests` | `bu_llm_requests_total` | Counter | `provider`, `model`, `feature`, `outcome` (`ok`/`error`/`rate_limited`/`timeout`) | LLM error rate |
+| `bu.llm.cost` | `bu_llm_cost_usd_total` | Counter (USD, estimated from a price table) | `provider`, `model` | Budget alert (NFR-COST-003) |
+| `bu.llm.time_to_first_token` | `bu_llm_time_to_first_token_seconds` | Histogram | `provider`, `feature` | NFR-PERF-005 / SLO-5 |
+| `bu.ai.citations` | `bu_ai_citations_total` | Counter | `result` (`valid`/`stripped`/`answer_rejected`) | K-3 grounding quality |
+| `bu.retrieval.duration` | `bu_retrieval_duration_seconds` | Histogram | `mode` | Q&A latency breakdown |
 
 ### 5.7 Notifications, tenancy, auth, security
 
 | OTel name | Prometheus name | Type | Labels | Purpose |
 |---|---|---|---|---|
-| `ca.notify.sent` | `ca_notify_sent_total` | Counter | `channel`, `event_type`, `outcome` | Delivery health (FR-NOT-004) |
-| `ca.notify.outbox.pending` | `ca_notify_outbox_pending` | Gauge | `channel` | Backlog |
-| `ca.notify.outbox.oldest_age` | `ca_notify_outbox_oldest_age_seconds` | Gauge | — | SLO-6 |
-| `ca.notify.provider.quota_remaining` | `ca_notify_provider_quota_remaining` | Gauge | `channel`, `provider` | Free email quotas (e.g. 100/day) |
-| `ca.tenants.active` | `ca_tenants_active` | Gauge | `plan` | Usage |
-| `ca.tenants.over_quota_threshold` | `ca_tenants_over_quota_threshold` | Gauge | `resource` (`chats`/`messages`/`llm_tokens`/`storage`), `threshold` (`0.8`/`1.0`) | Count of tenants near quota (MT-005) |
-| `ca.auth.attempts` | `ca_auth_attempts_total` | Counter | `provider`, `outcome` | Brute force (SEC-008) |
-| `ca.egress.blocked` | `ca_egress_blocked_total` | Counter | `destination_class` (`llm`/`telemetry`/`mail`/`other`) | PRV-001 egress guard |
-| `ca.frontend.events` | `ca_frontend_events_total` | Counter | `kind` (`error`/`vital`) | Opt-in RUM volume |
+| `bu.notify.sent` | `bu_notify_sent_total` | Counter | `channel`, `event_type`, `outcome` | Delivery health (FR-NOT-004) |
+| `bu.notify.outbox.pending` | `bu_notify_outbox_pending` | Gauge | `channel` | Backlog |
+| `bu.notify.outbox.oldest_age` | `bu_notify_outbox_oldest_age_seconds` | Gauge | — | SLO-6 |
+| `bu.notify.provider.quota_remaining` | `bu_notify_provider_quota_remaining` | Gauge | `channel`, `provider` | Free email quotas (e.g. 100/day) |
+| `bu.tenants.active` | `bu_tenants_active` | Gauge | `plan` | Usage |
+| `bu.tenants.over_quota_threshold` | `bu_tenants_over_quota_threshold` | Gauge | `resource` (`chats`/`messages`/`llm_tokens`/`storage`), `threshold` (`0.8`/`1.0`) | Count of tenants near quota (MT-005) |
+| `bu.auth.attempts` | `bu_auth_attempts_total` | Counter | `provider`, `outcome` | Brute force (SEC-008) |
+| `bu.egress.blocked` | `bu_egress_blocked_total` | Counter | `destination_class` (`llm`/`telemetry`/`mail`/`other`) | PRV-001 egress guard |
+| `bu.frontend.events` | `bu_frontend_events_total` | Counter | `kind` (`error`/`vital`) | Opt-in RUM volume |
 
 ### 5.8 Series budget
 
@@ -315,7 +315,7 @@ the `otelslog` bridge (so Loki receives them with trace correlation).
 | `time` | RFC 3339 nano | `2026-10-24T18:01:02.123Z` | UTC |
 | `level` | string | `INFO` | `DEBUG` never enabled in hosted production |
 | `msg` | string | `import completed` | **Constant string**, never formatted with user data |
-| `service`, `version`, `env` | string | `chat-analyzer`, `0.3.1`, `production` | |
+| `service`, `version`, `env` | string | `between-us`, `0.3.1`, `production` | |
 | `component` | string | `ingest.whatsapp` | Package-level logger |
 | `trace_id`, `span_id` | hex | | From context |
 | `request_id` | string | `01JB…` (ULID) | Also returned as `X-Request-ID` |
@@ -347,7 +347,7 @@ and an alert.
 | R-5 | No raw IDs of tenants/users in hosted telemetry; use HMAC hashes. | `telemetry.TenantAttr(ctx)` helper is the only way to attach tenant info. |
 | R-6 | Request/response bodies and headers (incl. `Authorization`, cookies) are never logged. | Access-log middleware logs a fixed field set. |
 | R-7 | Prompt/completion content is never captured (GenAI semconv content capture off). | Forbidden-key test (§4.2). |
-| R-8 | A **canary test** imports a fixture containing the sentinel string `CA-PII-CANARY-7f3a`, runs every endpoint and job with telemetry going to an in-memory exporter, and fails if the sentinel appears anywhere. | `go test ./internal/telemetry/... -run TestPIICanary` in CI. |
+| R-8 | A **canary test** imports a fixture containing the sentinel string `BU-PII-CANARY-7f3a`, runs every endpoint and job with telemetry going to an in-memory exporter, and fails if the sentinel appears anywhere. | `go test ./internal/telemetry/... -run TestPIICanary` in CI. |
 | R-9 | Production log canary: a LogQL alert fires if logs contain JSON keys typical of content (`"text":`, `"body":`, `"content":`) or the canary string. | Alert `SensitiveDataInLogs` (§14). |
 
 ## 8. Frontend telemetry (opt-in)
@@ -377,8 +377,8 @@ NFR-OBS-004. Served by every profile; none require authentication except `/metri
 | `GET /healthz` | Liveness | Process is serving HTTP. No dependencies. | `200 {"status":"ok"}` | (no response) |
 | `GET /readyz` | Readiness and synthetic probe target | DB ping (≤ 1 s), schema version ≥ binary's required version, in-process worker heartbeat < 2 min (`inprocess` mode), runs the gauge sampler (§5.4) | `200 {"status":"ready","checks":{...}}` | `503` with per-check `ok`/`fail` and a short reason code — no hostnames, DSNs or secrets |
 | `GET /version` | Build info | — | `200 {"version","commit","built_at","go","profile","jobs_mode"}` | — |
-| `GET /metrics` | Prometheus scrape | — | Prometheus text format | Disabled unless `CA_METRICS_ENABLED=true`; bound to loopback in `local`; requires `Authorization: Bearer $CA_METRICS_TOKEN` when exposed publicly |
-| `GET /debug/pprof/*` | Profiling | — | Go pprof | Only when `CA_PPROF_ENABLED=true` **and** bound to loopback |
+| `GET /metrics` | Prometheus scrape | — | Prometheus text format | Disabled unless `BU_METRICS_ENABLED=true`; bound to loopback in `local`; requires `Authorization: Bearer $BU_METRICS_TOKEN` when exposed publicly |
+| `GET /debug/pprof/*` | Profiling | — | Go pprof | Only when `BU_PPROF_ENABLED=true` **and** bound to loopback |
 
 `/healthz`, `/readyz` and `/version` are also mounted under `/api/` (e.g. `/api/readyz`) so that deployments
 where the web host rewrites only `/api/*` to the API (the `cloud-free` profile) can probe the full path through
@@ -406,10 +406,10 @@ docker compose -f deploy/compose/docker-compose.yml --profile observability --pr
 App configuration for this stack:
 
 ```bash
-CA_OTEL_ENABLED=true
+BU_OTEL_ENABLED=true
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-CA_METRICS_ENABLED=true
+BU_METRICS_ENABLED=true
 ```
 
 Dashboards and alert rules from `deploy/grafana/` are mounted into the container's Grafana provisioning
@@ -449,7 +449,7 @@ version-controlled and applied by CI (NFR-OBS-005).
 
 | File | Audience | Panels |
 |---|---|---|
-| `overview.json` | Everyone | Golden signals, SLO status, active alerts, deploy markers (`ca_build_info` changes), synthetic uptime |
+| `overview.json` | Everyone | Golden signals, SLO status, active alerts, deploy markers (`bu_build_info` changes), synthetic uptime |
 | `api-red.json` | Engineer | Per-route rate / error ratio / p50-p95-p99, status class split, rate-limit rejections, SSE streams |
 | `slo.json` | Operator | SLO-1…SLO-7 attainment, remaining error budget, burn rates (1 h / 6 h / 3 d) |
 | `jobs-imports.json` | Engineer | Queue depth by type, oldest pending age, outcomes, duration vs 300 s serverless budget, import success ratio (K-1), skipped-line reasons, format variants |
@@ -502,22 +502,22 @@ ca:http_error_ratio:rate5m    = ca:http_errors:rate5m / ca:http_requests:rate5m
 | `SloFastBurn` (SLO-1) | page | `ca:http_error_ratio:rate1h > (14.4 * 0.005) and ca:http_error_ratio:rate5m > (14.4 * 0.005)` | 2m | [RB-2](#rb-2-slofastburn--sloslowburn) |
 | `SloSlowBurn` (SLO-1) | ticket | `ca:http_error_ratio:rate6h > (6 * 0.005) and ca:http_error_ratio:rate30m > (6 * 0.005)` | 15m | [RB-2](#rb-2-slofastburn--sloslowburn) |
 | `ApiLatencyP95High` (SLO-2) | ticket | `histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{http_route=~"/api/v1/chats/.*/(metrics\|rollups).*"}[10m]))) > 0.8` | 15m | [RB-3](#rb-3-apilatencyp95high) |
-| `JobBacklogStale` (SLO-4) | page | `max(ca_jobs_oldest_pending_age_seconds) > 900` | 5m | [RB-4](#rb-4-jobbacklogstale) |
-| `JobFailureRateHigh` | ticket | `sum(rate(ca_jobs_completed_total{outcome=~"failed\|dead"}[30m])) / sum(rate(ca_jobs_completed_total[30m])) > 0.10 and sum(increase(ca_jobs_completed_total{outcome=~"failed\|dead"}[30m])) >= 5` | 10m | [RB-5](#rb-5-jobfailureratehigh) |
-| `ImportFailureSpike` (SLO-3) | ticket | `sum(increase(ca_import_files_total{outcome="failed"}[1h])) / sum(increase(ca_import_files_total[1h])) > 0.05 and sum(increase(ca_import_files_total[1h])) >= 5` | 0m | [RB-6](#rb-6-importfailurespike) |
-| `LlmErrorRateHigh` | ticket | `sum(rate(ca_llm_requests_total{outcome!="ok"}[10m])) / sum(rate(ca_llm_requests_total[10m])) > 0.20 and sum(rate(ca_llm_requests_total[10m])) > 0` | 10m | [RB-7](#rb-7-llmerrorratehigh) |
-| `LlmDailyCostBudget` | ticket | `sum(increase(ca_llm_cost_usd_total[24h])) > ${CA_LLM_DAILY_BUDGET_USD}` (templated at apply time; default `0` on the free profile, i.e. any paid usage alerts) | 0m | [RB-8](#rb-8-llmdailycostbudget) |
-| `TenantQuota80` | info | `sum(ca_tenants_over_quota_threshold{threshold="0.8"}) > 0` — operator digest only; the **tenant** is notified in-app by the Notifier (`quota.warning` event) | 1h | [RB-9](#rb-9-tenantquota80) |
-| `DbSizeNearLimit` | ticket | `max(ca_db_size_bytes) / max(ca_db_size_limit_bytes) > 0.80` | 30m | [RB-10](#rb-10-dbsizenearlimit--dbsizecritical) |
-| `DbSizeCritical` | page | `max(ca_db_size_bytes) / max(ca_db_size_limit_bytes) > 0.95` | 5m | [RB-10](#rb-10-dbsizenearlimit--dbsizecritical) |
+| `JobBacklogStale` (SLO-4) | page | `max(bu_jobs_oldest_pending_age_seconds) > 900` | 5m | [RB-4](#rb-4-jobbacklogstale) |
+| `JobFailureRateHigh` | ticket | `sum(rate(bu_jobs_completed_total{outcome=~"failed\|dead"}[30m])) / sum(rate(bu_jobs_completed_total[30m])) > 0.10 and sum(increase(bu_jobs_completed_total{outcome=~"failed\|dead"}[30m])) >= 5` | 10m | [RB-5](#rb-5-jobfailureratehigh) |
+| `ImportFailureSpike` (SLO-3) | ticket | `sum(increase(bu_import_files_total{outcome="failed"}[1h])) / sum(increase(bu_import_files_total[1h])) > 0.05 and sum(increase(bu_import_files_total[1h])) >= 5` | 0m | [RB-6](#rb-6-importfailurespike) |
+| `LlmErrorRateHigh` | ticket | `sum(rate(bu_llm_requests_total{outcome!="ok"}[10m])) / sum(rate(bu_llm_requests_total[10m])) > 0.20 and sum(rate(bu_llm_requests_total[10m])) > 0` | 10m | [RB-7](#rb-7-llmerrorratehigh) |
+| `LlmDailyCostBudget` | ticket | `sum(increase(bu_llm_cost_usd_total[24h])) > ${BU_LLM_DAILY_BUDGET_USD}` (templated at apply time; default `0` on the free profile, i.e. any paid usage alerts) | 0m | [RB-8](#rb-8-llmdailycostbudget) |
+| `TenantQuota80` | info | `sum(bu_tenants_over_quota_threshold{threshold="0.8"}) > 0` — operator digest only; the **tenant** is notified in-app by the Notifier (`quota.warning` event) | 1h | [RB-9](#rb-9-tenantquota80) |
+| `DbSizeNearLimit` | ticket | `max(bu_db_size_bytes) / max(bu_db_size_limit_bytes) > 0.80` | 30m | [RB-10](#rb-10-dbsizenearlimit--dbsizecritical) |
+| `DbSizeCritical` | page | `max(bu_db_size_bytes) / max(bu_db_size_limit_bytes) > 0.95` | 5m | [RB-10](#rb-10-dbsizenearlimit--dbsizecritical) |
 | `SyntheticCheckFailing` (SLO-7) | page | Hosted: `avg_over_time(probe_success{job="ca-readyz"}[3m]) < 0.67` (2 of 3 probes failed) · Local: same on blackbox exporter | 1m | [RB-11](#rb-11-syntheticcheckfailing) |
-| `NotificationOutboxStuck` (SLO-6) | ticket | `max(ca_notify_outbox_oldest_age_seconds) > 1800` | 10m | [RB-12](#rb-12-notificationoutboxstuck) |
-| `EmailProviderQuotaLow` | ticket | `min(ca_notify_provider_quota_remaining{channel="email"}) < 10` | 0m | [RB-12](#rb-12-notificationoutboxstuck) |
-| `PanicDetected` | page | LogQL: `sum(count_over_time({service_name="chat-analyzer"} \| json \| level="ERROR" \| msg="panic recovered" [5m])) > 0` | 0m | [RB-13](#rb-13-panicdetected) |
-| `SensitiveDataInLogs` | page (security) | LogQL: `sum(count_over_time({service_name="chat-analyzer"} \|~ "CA-PII-CANARY-7f3a\|\"(text\|body\|content\|message_text)\"\\s*:" [15m])) > 0` | 0m | [RB-14](#rb-14-sensitivedatainlogs) |
-| `AuthBruteForce` | ticket (security) | `sum(rate(ca_auth_attempts_total{outcome="failure"}[10m])) > 1` | 10m | [RB-15](#rb-15-authbruteforce) |
-| `EgressBlocked` | ticket (security) | `sum(increase(ca_egress_blocked_total[15m])) > 0` | 0m | [RB-16](#rb-16-egressblocked) |
-| `TelemetryDeadman` | ticket | `absent_over_time(ca_build_info[30m])` — **only on `inprocess` hosts**; on scale-to-zero hosts the synthetic check is the dead-man signal | 0m | [RB-17](#rb-17-telemetrydeadman) |
+| `NotificationOutboxStuck` (SLO-6) | ticket | `max(bu_notify_outbox_oldest_age_seconds) > 1800` | 10m | [RB-12](#rb-12-notificationoutboxstuck) |
+| `EmailProviderQuotaLow` | ticket | `min(bu_notify_provider_quota_remaining{channel="email"}) < 10` | 0m | [RB-12](#rb-12-notificationoutboxstuck) |
+| `PanicDetected` | page | LogQL: `sum(count_over_time({service_name="between-us"} \| json \| level="ERROR" \| msg="panic recovered" [5m])) > 0` | 0m | [RB-13](#rb-13-panicdetected) |
+| `SensitiveDataInLogs` | page (security) | LogQL: `sum(count_over_time({service_name="between-us"} \|~ "BU-PII-CANARY-7f3a\|\"(text\|body\|content\|message_text)\"\\s*:" [15m])) > 0` | 0m | [RB-14](#rb-14-sensitivedatainlogs) |
+| `AuthBruteForce` | ticket (security) | `sum(rate(bu_auth_attempts_total{outcome="failure"}[10m])) > 1` | 10m | [RB-15](#rb-15-authbruteforce) |
+| `EgressBlocked` | ticket (security) | `sum(increase(bu_egress_blocked_total[15m])) > 0` | 0m | [RB-16](#rb-16-egressblocked) |
+| `TelemetryDeadman` | ticket | `absent_over_time(bu_build_info[30m])` — **only on `inprocess` hosts**; on scale-to-zero hosts the synthetic check is the dead-man signal | 0m | [RB-17](#rb-17-telemetrydeadman) |
 
 Burn-rate factors follow the multi-window, multi-burn-rate method (Google SRE Workbook): a 14.4× burn exhausts
 2% of a 30-day budget in 1 hour; 6× exhausts 5% in 6 hours. All thresholds are parameters in
@@ -573,7 +573,7 @@ Each runbook: **Meaning → Impact → Diagnose → Mitigate → Follow-up**. Li
   Open an exemplar trace from the error panel; look for DB errors (`db.client.operation.duration` spike), DB
   connection exhaustion (Aiven free: 20 connections), or provider outage (Supabase/Vercel status pages).
 - **Mitigate:** Recent deploy → instant rollback ([Deployment §11](07-deployment.md#11-upgrades-and-rollback)).
-  Connection exhaustion → lower `CA_DB_MAX_CONNS`, use the provider's pooler. Paused DB (Supabase free pauses
+  Connection exhaustion → lower `BU_DB_MAX_CONNS`, use the provider's pooler. Paused DB (Supabase free pauses
   after 7 days idle) → restore from the Supabase dashboard.
 - **Follow-up:** Post-incident note in `docs/incidents/` if budget burn > 10%.
 
@@ -590,14 +590,14 @@ Each runbook: **Meaning → Impact → Diagnose → Mitigate → Follow-up**. Li
 - **Diagnose:** `api-red.json` → route; trace exemplars → slow span. Typical causes: rollup cache miss on a
   very large chat, missing index after a migration, DB on a different region than the function, CPU-starved
   free container (Koyeb free is 0.1 vCPU).
-- **Mitigate:** Rebuild rollups (`chatanalyzer jobs enqueue rollup.rebuild --chat <id>` via admin console),
+- **Mitigate:** Rebuild rollups (`betweenus jobs enqueue rollup.rebuild --chat <id>` via admin console),
   add/repair index, co-locate regions.
 - **Follow-up:** Add a regression benchmark for the slow query.
 
 ### RB-4 JobBacklogStale
 - **Meaning:** The oldest pending job waited > 15 minutes.
 - **Impact:** Imports/insights appear stuck; SLO-4.
-- **Diagnose:** `jobs-imports.json` → job types; check `ca_jobs_pump_ticks_total` (pump mode: are clients/cron
+- **Diagnose:** `jobs-imports.json` → job types; check `bu_jobs_pump_ticks_total` (pump mode: are clients/cron
   ticking?), worker heartbeat in `/readyz` (inprocess mode), and whether a single job is repeatedly timing out
   at the 300 s serverless limit.
 - **Mitigate:** Trigger a manual pump (`POST /api/v1/admin/jobs/pump`), restart the container, or move a poison
@@ -612,7 +612,7 @@ Each runbook: **Meaning → Impact → Diagnose → Mitigate → Follow-up**. Li
 
 ### RB-6 ImportFailureSpike
 - **Meaning:** > 5% of import files failed in the last hour.
-- **Diagnose:** `jobs-imports.json` → `ca_import_lines_skipped_total` by `reason`, `ca_import_format_detected_total`
+- **Diagnose:** `jobs-imports.json` → `bu_import_lines_skipped_total` by `reason`, `bu_import_format_detected_total`
   by variant. A new variant or a spike in `date_ambiguous`/`unknown_line_format` usually means WhatsApp/Telegram
   changed their export format.
 - **Mitigate:** Ask affected users (via the in-app "report a format" flow, which sends only a redacted line
@@ -624,7 +624,7 @@ Each runbook: **Meaning → Impact → Diagnose → Mitigate → Follow-up**. Li
 - **Impact:** AI features degrade to deterministic mode (FR-AI-007); dashboards are unaffected.
 - **Diagnose:** `llm-ai.json` by provider/model and `outcome`. `rate_limited` → free-tier quota (Groq/OpenRouter/
   Gemini daily caps); `timeout` → local Ollama overloaded or model not pulled.
-- **Mitigate:** Switch the workspace to a fallback provider, lower concurrency (`CA_LLM_MAX_CONCURRENCY`), or
+- **Mitigate:** Switch the workspace to a fallback provider, lower concurrency (`BU_LLM_MAX_CONCURRENCY`), or
   pull the model (`ollama pull <model>`).
 - **Follow-up:** Revisit cache hit ratio; precompute summaries off-peak.
 
@@ -643,7 +643,7 @@ Each runbook: **Meaning → Impact → Diagnose → Mitigate → Follow-up**. Li
 - **Meaning:** Database is above 80% / 95% of the free-tier size limit (Supabase free: 500 MB; Aiven free: 1 GB;
   Neon free: 1 GB/project).
 - **Impact:** At the limit, the provider may make the DB read-only — imports fail.
-- **Diagnose:** `runtime-db.json`; run `chatanalyzer admin db-usage` for top tables and top tenants by bytes.
+- **Diagnose:** `runtime-db.json`; run `betweenus admin db-usage` for top tables and top tenants by bytes.
 - **Mitigate:** Run retention jobs (PRV-005), `VACUUM (FULL)` on bloated tables during a quiet window, drop
   embeddings for archived chats, tighten free-plan message quotas, or move to a larger free provider.
 - **Follow-up:** Revisit `NFR-PERF-006` per-tenant defaults.

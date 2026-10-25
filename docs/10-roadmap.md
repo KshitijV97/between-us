@@ -1,4 +1,4 @@
-# Chat Analyzer — Roadmap
+# Between Us — Roadmap
 
 | Field | Value |
 |---|---|
@@ -19,7 +19,7 @@
 
 ```mermaid
 gantt
-    title Chat Analyzer MVP plan - one developer plus AI agents
+    title Between Us MVP plan - one developer plus AI agents
     dateFormat YYYY-MM-DD
     axisFormat %d %b
     section Foundation
@@ -61,7 +61,7 @@ gantt
 
 | | |
 |---|---|
-| **Deliverables** | Monorepo layout (`backend/`, `web/`, `deploy/`, `docs/`); Go module + `chatanalyzer version`; Vite React TS app skeleton; `Makefile`/`justfile` with `dev`, `test`, `lint`, `build`; GitHub Actions: lint, test, build, security gates (govulncheck, gosec, osv-scanner, gitleaks, CodeQL); Conventional Commits + changelog tooling; `.env.example`; `SECURITY.md`, `CONTRIBUTING.md`, `LICENSE` (Apache-2.0); ADR template and first ADRs; this doc set linked from README. |
+| **Deliverables** | Monorepo layout (`backend/`, `web/`, `deploy/`, `docs/`); Go module + `betweenus version`; Vite React TS app skeleton; `Makefile`/`justfile` with `dev`, `test`, `lint`, `build`; GitHub Actions: lint, test, build, security gates (govulncheck, gosec, osv-scanner, gitleaks, CodeQL); Conventional Commits + changelog tooling; `.env.example`; `SECURITY.md`, `CONTRIBUTING.md`, `LICENSE` (Apache-2.0); ADR template and first ADRs; this doc set linked from README. |
 | **Requirements** | NFR-MNT-001, NFR-MNT-004, NFR-MNT-005, NFR-MNT-006, SEC-005, SEC-007 (scanning part) |
 | **Exit criteria** | Fresh clone → `make dev` runs an empty API + web page; CI green on `main`; all docs render on GitHub. |
 | **Parallel split** | Agent A: Go skeleton + CI. Agent B: web skeleton + lint/format. Agent C: ADRs + `SECURITY.md`/`CONTRIBUTING.md`. No shared files except root `Makefile` (owned by A). |
@@ -71,7 +71,7 @@ gantt
 
 | | |
 |---|---|
-| **Deliverables** | `ingest` package with `Parser` interface ([telegram.md §7](parsers/telegram.md#7-parser-interface-contract)); WhatsApp parser (all variants, date-order inference, sender lexicon, markers); Telegram JSON streaming parser; zip handling with limits; synthetic fixture generator + golden tests + fuzz targets; `store` interface with SQLite implementation and goose migrations for tenants/users/chats/participants/imports/messages; fingerprint de-dup and incremental import; `chatanalyzer import <file>` CLI; import report. |
+| **Deliverables** | `ingest` package with `Parser` interface ([telegram.md §7](parsers/telegram.md#7-parser-interface-contract)); WhatsApp parser (all variants, date-order inference, sender lexicon, markers); Telegram JSON streaming parser; zip handling with limits; synthetic fixture generator + golden tests + fuzz targets; `store` interface with SQLite implementation and goose migrations for tenants/users/chats/participants/imports/messages; fingerprint de-dup and incremental import; `betweenus import <file>` CLI; import report. |
 | **Requirements** | FR-ING-001 (CLI), FR-ING-002…014, FR-LIB-002 (delete, store side), NFR-PERF-002, NFR-REL-002, NFR-REL-004, NFR-MNT-002, NFR-MNT-003, SEC-003 (upload), MT-001 (schema carries `tenant_id`) |
 | **Exit criteria** | All fixtures in both parser fixture matrices pass; 200 MB synthetic WhatsApp export imports under the memory ceiling; re-import adds zero rows; fuzzers run 10 min with no crash. |
 | **Parallel split** | Agent A: WhatsApp parser + fixtures. Agent B: Telegram parser + fixtures. Agent C: store + migrations + import orchestration. Contract (`ingest.Message`, `Parser`, `Sink`) is written first by the lead and frozen; agents only touch their own packages. |
@@ -82,7 +82,7 @@ gantt
 
 | | |
 |---|---|
-| **Deliverables** | Sessionisation, turns, response-time engine; daily rollups per participant with mergeable sketches; window aggregation for day/week/month/year/all/custom in IANA timezones (DST-safe); metrics M-001…M-027 (deterministic, lexicon sentiment incl. emoji and romanised-Hindi lexicons); prev-window comparison; OpenAPI 3.1 spec for chats, imports, messages, metrics; `chatanalyzer serve` with stdlib routing, middleware (request id, recovery, CORS, security headers, rate limit); generated TS client; jobs table with `inprocess` mode. |
+| **Deliverables** | Sessionisation, turns, response-time engine; daily rollups per participant with mergeable sketches; window aggregation for day/week/month/year/all/custom in IANA timezones (DST-safe); metrics M-001…M-027 (deterministic, lexicon sentiment incl. emoji and romanised-Hindi lexicons); prev-window comparison; OpenAPI 3.1 spec for chats, imports, messages, metrics; `betweenus serve` with stdlib routing, middleware (request id, recovery, CORS, security headers, rate limit); generated TS client; jobs table with `inprocess` mode. |
 | **Requirements** | FR-ANA-001…003, FR-ANA-006, FR-API-001, FR-API-002, FR-LIB-001, FR-LIB-003 (API), FR-LIB-004, FR-AI-007 (deterministic part), NFR-PERF-003, NFR-OBS-004 |
 | **Exit criteria** | Hand-computed expected values match for every metric across five window types incl. a DST boundary (acceptance criterion 3); dashboard endpoint p95 ≤ 300 ms locally on a 1M-message synthetic chat. |
 | **Parallel split** | Agent A: sessionisation + response time + rollups. Agent B: text metrics (words, emoji, lexicons, sentiment). Agent C: HTTP layer + OpenAPI + TS client generation. Shared: `metrics` result types (lead owns). |

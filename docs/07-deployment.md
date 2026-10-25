@@ -1,4 +1,4 @@
-# Chat Analyzer — Deployment Guide
+# Between Us — Deployment Guide
 
 | Field | Value |
 |---|---|
@@ -34,7 +34,7 @@
 
 ## 1. Profiles at a glance
 
-All profiles run **the same `chatanalyzer` binary**; behaviour is selected by `CA_*` environment variables.
+All profiles run **the same `betweenus` binary**; behaviour is selected by `CA_*` environment variables.
 
 | Profile | Who it's for | Runs | Database | Jobs | Auth | Telemetry | Cost |
 |---|---|---|---|---|---|---|---|
@@ -54,29 +54,29 @@ All profiles run **the same `chatanalyzer` binary**; behaviour is selected by `C
 flowchart LR
     subgraph Laptop["Your machine - nothing leaves it by default"]
         browser["Browser<br/>http://127.0.0.1:7420"]
-        bin["chatanalyzer serve<br/>API, workers, embedded web UI"]
-        db[("SQLite file<br/>CA_DATA_DIR/chatanalyzer.db")]
+        bin["betweenus serve<br/>API, workers, embedded web UI"]
+        db[("SQLite file<br/>BU_DATA_DIR/betweenus.db")]
         ollama["Ollama - optional<br/>http://127.0.0.1:11434"]
     end
     browser --> bin
     bin --> db
-    bin -.->|"only if CA_LLM_PROVIDER=ollama"| ollama
+    bin -.->|"only if BU_LLM_PROVIDER=ollama"| ollama
 ```
 
 ```bash
 # Download a release binary (or `make build`), then:
-chatanalyzer serve
+betweenus serve
 ```
 
 Defaults in this profile:
 
 | Setting | Default | Why |
 |---|---|---|
-| Listen address | `127.0.0.1:7420` | Loopback only; exposing on a LAN requires `CA_HTTP_ADDR=0.0.0.0:7420` **and** `CA_AUTH_PROVIDER=local` with a passphrase. |
-| Data directory | macOS `~/Library/Application Support/chatanalyzer`, Linux `~/.local/share/chatanalyzer`, Windows `%APPDATA%\chatanalyzer` | One folder to back up or delete. |
+| Listen address | `127.0.0.1:7420` | Loopback only; exposing on a LAN requires `BU_HTTP_ADDR=0.0.0.0:7420` **and** `BU_AUTH_PROVIDER=local` with a passphrase. |
+| Data directory | macOS `~/Library/Application Support/betweenus`, Linux `~/.local/share/betweenus`, Windows `%APPDATA%\betweenus` | One folder to back up or delete. |
 | LLM | `none` until configured | FR-AI-007 deterministic mode works out of the box. |
 | Telemetry | Off | NFR-OBS-008. |
-| Egress | Allow-list = loopback only | PRV-001; violations increment `ca_egress_blocked_total` and are refused. |
+| Egress | Allow-list = loopback only | PRV-001; violations increment `bu_egress_blocked_total` and are refused. |
 | Auth | Single implicit user; optional passphrase lock | FR-ADM-001. |
 
 Optional local LLM:
@@ -85,7 +85,7 @@ Optional local LLM:
 brew install ollama        # or see ollama.com for Linux/Windows
 ollama pull llama3.1:8b    # chat model (any Ollama model works)
 ollama pull nomic-embed-text
-CA_LLM_PROVIDER=ollama CA_LLM_MODEL=llama3.1:8b CA_EMBED_MODEL=nomic-embed-text chatanalyzer serve
+BU_LLM_PROVIDER=ollama BU_LLM_MODEL=llama3.1:8b BU_EMBED_MODEL=nomic-embed-text betweenus serve
 ```
 
 ## 3. Profile: local-full (Docker Compose)
@@ -93,7 +93,7 @@ CA_LLM_PROVIDER=ollama CA_LLM_MODEL=llama3.1:8b CA_EMBED_MODEL=nomic-embed-text 
 ```mermaid
 flowchart LR
     subgraph Host["Docker host - laptop, home server or VM"]
-        app["app<br/>chatanalyzer serve :7420"]
+        app["app<br/>betweenus serve :7420"]
         pg[("postgres<br/>pgvector/pgvector")]
         lgtm["otel-lgtm<br/>Grafana :3000, OTLP :4318"]
         mail["mailpit<br/>SMTP :1025, UI :8025"]
@@ -136,8 +136,8 @@ Without `--profile postgres` the app uses SQLite in a named volume, which makes 
 flowchart TB
     user["Browser or PWA"]
     subgraph Vercel["Vercel Hobby"]
-        webp["Project: chat-analyzer-web<br/>static Vite build, root dir web/"]
-        apip["Project: chat-analyzer-api<br/>Go runtime beta, root dir backend/<br/>Fluid compute, max 300s"]
+        webp["Project: between-us-web<br/>static Vite build, root dir web/"]
+        apip["Project: between-us-api<br/>Go runtime beta, root dir backend/<br/>Fluid compute, max 300s"]
         cron["Vercel Cron<br/>once per day"]
     end
     subgraph Supabase["Supabase Free - 2 projects"]
@@ -176,9 +176,9 @@ Key design choices for this profile:
 - **Two Vercel projects from one monorepo.** The Go preset requires `go.mod` at the project root, so the API
   project's Root Directory is `backend/`; the web project's is `web/`. The web project **rewrites `/api/*`** to the
   API project, so the browser sees one origin (first-party cookies, no CORS, simple CSP).
-- **`CA_JOBS_MODE=pump`.** Vercel Hobby cron runs at most **once per day** with ±59 min precision, so it cannot
+- **`BU_JOBS_MODE=pump`.** Vercel Hobby cron runs at most **once per day** with ±59 min precision, so it cannot
   drive a job queue. Instead, while an import or insight job is running, the UI polls
-  `POST /api/v1/jobs/{id}/pump`, and each call processes work for up to `CA_PUMP_BUDGET_MS` (default 20 s, well
+  `POST /api/v1/jobs/{id}/pump`, and each call processes work for up to `BU_PUMP_BUDGET_MS` (default 20 s, well
   under the 300 s Hobby maximum) before returning progress. The daily cron handles retention, digests and
   orphaned jobs; the synthetic `/readyz` probe also advances due jobs (bounded to 2 s).
 - **Supabase's two free projects** become `staging` and `production`.
@@ -191,7 +191,7 @@ Key design choices for this profile:
 ```mermaid
 flowchart LR
     user["Browser"] --> pages["Vercel / Cloudflare Pages / Netlify<br/>static web UI"]
-    pages -->|"rewrite /api/*"| ctr["Render free web service or Koyeb free instance<br/>chatanalyzer serve, inprocess workers"]
+    pages -->|"rewrite /api/*"| ctr["Render free web service or Koyeb free instance<br/>betweenus serve, inprocess workers"]
     ctr --> db[("Supabase, Aiven or Neon Postgres")]
     ctr -->|"OTLP"| gc["Grafana Cloud free"]
     ctr -->|"HTTPS email API - SMTP ports blocked on Render free"| mail["Resend, Brevo or Mailjet"]
@@ -293,23 +293,23 @@ verification.
 
 ### Step 2 — Databases (Supabase)
 
-1. Create two projects: `chat-analyzer-staging` and `chat-analyzer-prod`, in the same region you will use for the
+1. Create two projects: `between-us-staging` and `between-us-prod`, in the same region you will use for the
    API functions.
 2. In each project, open **Connect** and copy:
-   - the **transaction pooler** string (port `6543`) → `CA_DB_DSN` for the app (serverless-friendly);
-   - the **session pooler** string (port `5432`) → `CA_DB_MIGRATE_DSN` for migrations (needs session-level advisory
+   - the **transaction pooler** string (port `6543`) → `BU_DB_DSN` for the app (serverless-friendly);
+   - the **session pooler** string (port `5432`) → `BU_DB_MIGRATE_DSN` for migrations (needs session-level advisory
      locks).
 3. The first migration (run in step 5) creates the `app` schema, the `vector` extension, the non-owner role
-   `ca_app` and RLS policies. Set the `ca_app` password via the migration secret `CA_DB_APP_PASSWORD`, then point
-   `CA_DB_DSN` at `ca_app`, not at `postgres`.
-4. **Auth** → URL configuration: Site URL = your web URL (`https://chat-analyzer-web.vercel.app`), add the staging
+   `bu_app` and RLS policies. Set the `bu_app` password via the migration secret `BU_DB_APP_PASSWORD`, then point
+   `BU_DB_DSN` at `bu_app`, not at `postgres`.
+4. **Auth** → URL configuration: Site URL = your web URL (`https://between-us-web.vercel.app`), add the staging
    preview URL pattern to redirect URLs. Disable sign-ups that you don't want (e.g. allow only email + password
-   or magic link). Copy the project URL → `CA_SUPABASE_URL`; the API verifies JWTs via the project's JWKS endpoint
-   (`CA_SUPABASE_JWKS_URL`).
+   or magic link). Copy the project URL → `BU_SUPABASE_URL`; the API verifies JWTs via the project's JWKS endpoint
+   (`BU_SUPABASE_JWKS_URL`).
 5. **Data API**: ensure the `app` schema is **not** in the exposed schemas list.
 
 *Aiven alternative:* create a free PostgreSQL service, copy the service URI (with `sslmode=require`), set
-`CA_DB_MAX_CONNS=5` (20 total connections, no pooler), and use `CA_AUTH_PROVIDER=local` or `oidc`.
+`BU_DB_MAX_CONNS=5` (20 total connections, no pooler), and use `BU_AUTH_PROVIDER=local` or `oidc`.
 
 ### Step 3 — Grafana Cloud
 
@@ -329,13 +329,13 @@ including Render free where SMTP ports are blocked). Until you have a custom dom
 ### Step 5 — Vercel API project
 
 1. **Add New → Project** → import the repo → Root Directory `backend/` → Framework preset **Go**.
-2. Build command: `go build -trimpath -ldflags "-s -w -X main.version=$VERCEL_GIT_COMMIT_SHA" -o server ./cmd/chatanalyzer`
+2. Build command: `go build -trimpath -ldflags "-s -w -X main.version=$VERCEL_GIT_COMMIT_SHA" -o server ./cmd/betweenus`
    (the binary starts in `serve` mode when no subcommand is given and listens on `$PORT`).
 3. Function region: same region as Supabase. Max duration: 300 s (Hobby maximum).
 4. Environment variables (mark secrets as **Sensitive**): see [§8](#8-environment-variable-reference); at minimum
-   `CA_PROFILE=cloud-free`, `CA_ENV`, `CA_DB_DSN`, `CA_AUTH_PROVIDER=supabase`, `CA_SUPABASE_URL`,
-   `CA_SUPABASE_JWKS_URL`, `CA_JOBS_MODE=pump`, `CA_PUMP_SECRET`, `CA_PUBLIC_BASE_URL`, `CA_TELEMETRY_SALT`,
-   `CA_OTEL_ENABLED=true`, OTLP vars, email vars.
+   `BU_PROFILE=cloud-free`, `BU_ENV`, `BU_DB_DSN`, `BU_AUTH_PROVIDER=supabase`, `BU_SUPABASE_URL`,
+   `BU_SUPABASE_JWKS_URL`, `BU_JOBS_MODE=pump`, `BU_PUMP_SECRET`, `BU_PUBLIC_BASE_URL`, `BU_TELEMETRY_SALT`,
+   `BU_OTEL_ENABLED=true`, OTLP vars, email vars.
 5. Disable Vercel's automatic **production** deployments for this project (`git.deploymentEnabled` for `main` =
    false in `backend/vercel.json`); production is promoted by GitHub Actions *after* migrations (step 8).
    Preview deployments for PRs stay on and use the staging database.
@@ -349,7 +349,7 @@ including Render free where SMTP ports are blocked). Until you have a custom dom
    ```json
    {
      "rewrites": [
-       { "source": "/api/:path*", "destination": "https://chat-analyzer-api.vercel.app/api/:path*" },
+       { "source": "/api/:path*", "destination": "https://between-us-api.vercel.app/api/:path*" },
        { "source": "/(.*)", "destination": "/index.html" }
      ],
      "headers": [
@@ -367,7 +367,7 @@ including Render free where SMTP ports are blocked). Until you have a custom dom
 
 ### Step 7 — Synthetic check and dashboards
 
-1. Grafana Cloud → Synthetic Monitoring → HTTP check on `https://chat-analyzer-web.vercel.app/api/readyz`
+1. Grafana Cloud → Synthetic Monitoring → HTTP check on `https://between-us-web.vercel.app/api/readyz`
    (through the rewrite, so the whole path is tested), every 60 s, one probe location.
 2. Run the `deploy-observability` workflow once to push dashboards, alert rules and contact points.
 
@@ -377,7 +377,7 @@ including Render free where SMTP ports are blocked). Until you have a custom dom
    runs smoke tests, then waits for approval on the `production` environment → migrates **production** →
    `vercel deploy --prod` for API, then web.
 2. Smoke test: `/api/readyz` returns 200; sign up; import a synthetic fixture from `backend/testdata/`; see the
-   import trace in Grafana Tempo; trigger a test alert (`chatanalyzer admin test-alert`) and receive it.
+   import trace in Grafana Tempo; trigger a test alert (`betweenus admin test-alert`) and receive it.
 
 ## 8. Environment variable reference
 
@@ -386,62 +386,62 @@ commented `.env.example` at the repo root will mirror this table, which is the *
 
 | Variable | Default | Profiles | Description |
 |---|---|---|---|
-| `CA_PROFILE` | `local` | all | `local`, `local-full`, `cloud-free`, `cloud-free-container` — sets safe defaults for everything below |
-| `CA_MODE` | `local` for `local`, else `hosted` | all | `local` = single implicit tenant/user; `hosted` = multi-tenant |
-| `CA_ENV` | `local` | all | `local`, `staging`, `production` (telemetry `deployment.environment.name`) |
-| `CA_HTTP_ADDR` | `127.0.0.1:7420` | all | Listen address; `PORT` (set by Vercel/Render/Koyeb) overrides the port |
-| `CA_PUBLIC_BASE_URL` | `http://127.0.0.1:7420` | all | External URL used in emails, OAuth redirects, unsubscribe links |
-| `CA_DATA_DIR` | OS-specific | local | SQLite file, keys, optional kept exports |
-| `CA_DB_DRIVER` | `sqlite` | all | `sqlite` or `postgres` |
-| `CA_DB_DSN` | `file:$CA_DATA_DIR/chatanalyzer.db` | all | App connection (Postgres: non-owner `ca_app` role) |
-| `CA_DB_MIGRATE_DSN` | = `CA_DB_DSN` | postgres | Owner/session connection used only by `chatanalyzer migrate` |
-| `CA_DB_MAX_CONNS` | `10` (`5` serverless) | postgres | Pool size; keep low on Aiven free (20 total) |
-| `CA_DB_SIZE_LIMIT_BYTES` | unset | hosted | Free-tier DB size for `DbSizeNearLimit` (e.g. `524288000`) |
-| `CA_MIGRATE_ON_START` | `true` local, `false` hosted | all | Auto-migrate at boot (local) vs CI-driven (hosted) |
-| `CA_JOBS_MODE` | `inprocess` | all | `inprocess` or `pump` |
-| `CA_JOBS_CONCURRENCY`, `CA_JOBS_PER_TENANT` | `2`, `2` | inprocess | Worker goroutines; max concurrent jobs per tenant (fairness) |
-| `CA_PUMP_BUDGET_MS` | `20000` | pump | Max work per pump call |
-| `CA_PUMP_SECRET` | — | pump | Shared secret for cron/synthetic-triggered pumps |
+| `BU_PROFILE` | `local` | all | `local`, `local-full`, `cloud-free`, `cloud-free-container` — sets safe defaults for everything below |
+| `BU_MODE` | `local` for `local`, else `hosted` | all | `local` = single implicit tenant/user; `hosted` = multi-tenant |
+| `BU_ENV` | `local` | all | `local`, `staging`, `production` (telemetry `deployment.environment.name`) |
+| `BU_HTTP_ADDR` | `127.0.0.1:7420` | all | Listen address; `PORT` (set by Vercel/Render/Koyeb) overrides the port |
+| `BU_PUBLIC_BASE_URL` | `http://127.0.0.1:7420` | all | External URL used in emails, OAuth redirects, unsubscribe links |
+| `BU_DATA_DIR` | OS-specific | local | SQLite file, keys, optional kept exports |
+| `BU_DB_DRIVER` | `sqlite` | all | `sqlite` or `postgres` |
+| `BU_DB_DSN` | `file:$BU_DATA_DIR/betweenus.db` | all | App connection (Postgres: non-owner `bu_app` role) |
+| `BU_DB_MIGRATE_DSN` | = `BU_DB_DSN` | postgres | Owner/session connection used only by `betweenus migrate` |
+| `BU_DB_MAX_CONNS` | `10` (`5` serverless) | postgres | Pool size; keep low on Aiven free (20 total) |
+| `BU_DB_SIZE_LIMIT_BYTES` | unset | hosted | Free-tier DB size for `DbSizeNearLimit` (e.g. `524288000`) |
+| `BU_MIGRATE_ON_START` | `true` local, `false` hosted | all | Auto-migrate at boot (local) vs CI-driven (hosted) |
+| `BU_JOBS_MODE` | `inprocess` | all | `inprocess` or `pump` |
+| `BU_JOBS_CONCURRENCY`, `BU_JOBS_PER_TENANT` | `2`, `2` | inprocess | Worker goroutines; max concurrent jobs per tenant (fairness) |
+| `BU_PUMP_BUDGET_MS` | `20000` | pump | Max work per pump call |
+| `BU_PUMP_SECRET` | — | pump | Shared secret for cron/synthetic-triggered pumps |
 | `CRON_SECRET` | — | Vercel | Set by you; Vercel sends it as a bearer token to cron paths |
-| `CA_AUTH_PROVIDER` | `local` | all | `local`, `supabase`, `oidc` |
-| `CA_SESSION_SECRET` | generated (local) | local auth | Session cookie signing key (32+ bytes) |
-| `CA_SUPABASE_URL`, `CA_SUPABASE_JWKS_URL` | — | supabase | Project URL and JWKS for JWT verification |
-| `CA_OIDC_ISSUER`, `CA_OIDC_CLIENT_ID`, `CA_OIDC_CLIENT_SECRET` | — | oidc | Generic OIDC provider |
-| `CA_UPLOAD_MAX_BYTES` | `524288000` | all | Total export size cap (500 MB); uploads arrive in ≤ 4 MB parts (FR-ING-016) |
-| `CA_KEEP_RAW_EXPORTS` | `false` | all | Opt-in to keep original exports (FR-ING-014) |
-| `CA_RATE_LIMIT_RPS` | `10` | hosted | Per-tenant request rate (SEC-008) |
-| `CA_CORS_ORIGINS` | empty (same-origin) | hosted | Only needed if web and API are on different origins without a rewrite |
-| `CA_QUOTA_CHATS`, `CA_QUOTA_MESSAGES`, `CA_QUOTA_LLM_TOKENS_MONTH` | `5`, `500000`, provider-specific | hosted | Default per-tenant quotas (MT-005, NFR-PERF-006); lower `CA_QUOTA_MESSAGES` on a 500 MB free DB — see [Data model sizing](03-data-model.md#8-sizing-vs-free-tiers) |
-| `CA_MASTER_KEY` | — | P2 | Key-encryption key for per-tenant envelope encryption (MT-006, SEC-002) |
-| `CA_LLM_PROVIDER` | `none` | all | `none`, `ollama`, `openai-compatible`, `anthropic` |
-| `CA_LLM_BASE_URL` | provider default | all | e.g. `http://127.0.0.1:11434`, `https://api.groq.com/openai/v1` |
-| `CA_LLM_API_KEY` | — | hosted LLMs | Secret |
-| `CA_LLM_MODEL`, `CA_LLM_FAST_MODEL` | — | all | Main and cheap model (emotion labels, routing); see [AI insights](05-ai-insights.md) |
-| `CA_EMBED_PROVIDER`, `CA_EMBED_MODEL` | `none`, — | all | Embeddings; `none` = full-text search only |
-| `CA_LLM_TIMEOUT` | `120s` | all | Per-request timeout; keep below the function limit in `pump` mode |
-| `CA_LLM_REDACT_PII` | `true` | hosted LLMs | Redact PII before sending to hosted providers (PRV-003) |
-| `CA_LLM_DEBUG_CAPTURE` | `false` | local only | Write rendered prompts to a local file; refused in hosted mode |
-| `CA_PROMPT_DIR`, `CA_LEXICON_DIR` | embedded | local | Override embedded prompt templates / sentiment lexicons |
-| `CA_LLM_MAX_CONCURRENCY` | `2` | all | Per-process cap |
-| `CA_LLM_DAILY_BUDGET_USD` | `0` | hosted | Cost alert threshold; `0` = alert on any paid usage |
-| `CA_LLM_ALLOW_UNPAID_TRAINING_PROVIDERS` | `false` | hosted | Must be `true` to allow providers whose free tier trains on inputs (e.g. unpaid Gemini) |
-| `CA_EGRESS_ALLOWLIST` | loopback (local) | all | Comma-separated hosts the app may call (PRV-001) |
-| `CA_OTEL_ENABLED` | `false` local, `true` hosted | all | Master switch for OTLP export |
-| `CA_OTEL_SAMPLE_RATIO` | `0.2` | hosted | HTTP trace sampling ratio |
-| `CA_TELEMETRY_SALT` | — | hosted | HMAC salt for `tenant_hash`/`user_hash` |
-| `CA_METRICS_ENABLED`, `CA_METRICS_TOKEN`, `CA_METRICS_ADDR` | `false`, —, — | all | Prometheus `/metrics`, its bearer token, optional separate listener |
-| `CA_PPROF_ENABLED` | `false` | all | pprof on loopback only |
-| `CA_LOG_LEVEL`, `CA_LOG_FORMAT` | `info`, `text` local / `json` hosted | all | slog settings |
+| `BU_AUTH_PROVIDER` | `local` | all | `local`, `supabase`, `oidc` |
+| `BU_SESSION_SECRET` | generated (local) | local auth | Session cookie signing key (32+ bytes) |
+| `BU_SUPABASE_URL`, `BU_SUPABASE_JWKS_URL` | — | supabase | Project URL and JWKS for JWT verification |
+| `BU_OIDC_ISSUER`, `BU_OIDC_CLIENT_ID`, `BU_OIDC_CLIENT_SECRET` | — | oidc | Generic OIDC provider |
+| `BU_UPLOAD_MAX_BYTES` | `524288000` | all | Total export size cap (500 MB); uploads arrive in ≤ 4 MB parts (FR-ING-016) |
+| `BU_KEEP_RAW_EXPORTS` | `false` | all | Opt-in to keep original exports (FR-ING-014) |
+| `BU_RATE_LIMIT_RPS` | `10` | hosted | Per-tenant request rate (SEC-008) |
+| `BU_CORS_ORIGINS` | empty (same-origin) | hosted | Only needed if web and API are on different origins without a rewrite |
+| `BU_QUOTA_CHATS`, `BU_QUOTA_MESSAGES`, `BU_QUOTA_LLM_TOKENS_MONTH` | `5`, `500000`, provider-specific | hosted | Default per-tenant quotas (MT-005, NFR-PERF-006); lower `BU_QUOTA_MESSAGES` on a 500 MB free DB — see [Data model sizing](03-data-model.md#8-sizing-vs-free-tiers) |
+| `BU_MASTER_KEY` | — | P2 | Key-encryption key for per-tenant envelope encryption (MT-006, SEC-002) |
+| `BU_LLM_PROVIDER` | `none` | all | `none`, `ollama`, `openai-compatible`, `anthropic` |
+| `BU_LLM_BASE_URL` | provider default | all | e.g. `http://127.0.0.1:11434`, `https://api.groq.com/openai/v1` |
+| `BU_LLM_API_KEY` | — | hosted LLMs | Secret |
+| `BU_LLM_MODEL`, `BU_LLM_FAST_MODEL` | — | all | Main and cheap model (emotion labels, routing); see [AI insights](05-ai-insights.md) |
+| `BU_EMBED_PROVIDER`, `BU_EMBED_MODEL` | `none`, — | all | Embeddings; `none` = full-text search only |
+| `BU_LLM_TIMEOUT` | `120s` | all | Per-request timeout; keep below the function limit in `pump` mode |
+| `BU_LLM_REDACT_PII` | `true` | hosted LLMs | Redact PII before sending to hosted providers (PRV-003) |
+| `BU_LLM_DEBUG_CAPTURE` | `false` | local only | Write rendered prompts to a local file; refused in hosted mode |
+| `BU_PROMPT_DIR`, `BU_LEXICON_DIR` | embedded | local | Override embedded prompt templates / sentiment lexicons |
+| `BU_LLM_MAX_CONCURRENCY` | `2` | all | Per-process cap |
+| `BU_LLM_DAILY_BUDGET_USD` | `0` | hosted | Cost alert threshold; `0` = alert on any paid usage |
+| `BU_LLM_ALLOW_UNPAID_TRAINING_PROVIDERS` | `false` | hosted | Must be `true` to allow providers whose free tier trains on inputs (e.g. unpaid Gemini) |
+| `BU_EGRESS_ALLOWLIST` | loopback (local) | all | Comma-separated hosts the app may call (PRV-001) |
+| `BU_OTEL_ENABLED` | `false` local, `true` hosted | all | Master switch for OTLP export |
+| `BU_OTEL_SAMPLE_RATIO` | `0.2` | hosted | HTTP trace sampling ratio |
+| `BU_TELEMETRY_SALT` | — | hosted | HMAC salt for `tenant_hash`/`user_hash` |
+| `BU_METRICS_ENABLED`, `BU_METRICS_TOKEN`, `BU_METRICS_ADDR` | `false`, —, — | all | Prometheus `/metrics`, its bearer token, optional separate listener |
+| `BU_PPROF_ENABLED` | `false` | all | pprof on loopback only |
+| `BU_LOG_LEVEL`, `BU_LOG_FORMAT` | `info`, `text` local / `json` hosted | all | slog settings |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_EXPORTER_OTLP_PROTOCOL` | — | all | Standard OTel exporter config |
-| `CA_NOTIFY_CHANNELS` | `log` | all | Enabled channels: `email`, `push` (ntfy), `telegram`, `sms`, `log` |
-| `CA_EMAIL_TRANSPORT` | `smtp` | all | `smtp` or `api` |
-| `CA_EMAIL_API_PROVIDER`, `CA_EMAIL_API_KEY` | — | api | `resend`, `brevo`, `mailjet` |
-| `CA_SMTP_HOST`, `CA_SMTP_PORT`, `CA_SMTP_USERNAME`, `CA_SMTP_PASSWORD`, `CA_SMTP_TLS` | Mailpit `localhost:1025` in local-full | smtp | `CA_SMTP_TLS`: `starttls`, `implicit`, `none` (dev only) |
-| `CA_EMAIL_FROM`, `CA_EMAIL_REPLY_TO` | — | email | Sender identity |
-| `CA_EMAIL_DAILY_LIMIT` | provider-specific | email | Local counter to respect free quotas |
-| `CA_NTFY_URL`, `CA_NTFY_TOKEN` | — | ntfy | Server URL and access token |
-| `CA_TELEGRAM_BOT_TOKEN` | — | telegram | Bot token (secret) |
-| `CA_SMS_GATEWAY_URL`, `CA_SMS_GATEWAY_USERNAME`, `CA_SMS_GATEWAY_PASSWORD` | — | P3 | Android SMS gateway |
+| `BU_NOTIFY_CHANNELS` | `log` | all | Enabled channels: `email`, `push` (ntfy), `telegram`, `sms`, `log` |
+| `BU_EMAIL_TRANSPORT` | `smtp` | all | `smtp` or `api` |
+| `BU_EMAIL_API_PROVIDER`, `BU_EMAIL_API_KEY` | — | api | `resend`, `brevo`, `mailjet` |
+| `BU_SMTP_HOST`, `BU_SMTP_PORT`, `BU_SMTP_USERNAME`, `BU_SMTP_PASSWORD`, `BU_SMTP_TLS` | Mailpit `localhost:1025` in local-full | smtp | `BU_SMTP_TLS`: `starttls`, `implicit`, `none` (dev only) |
+| `BU_EMAIL_FROM`, `BU_EMAIL_REPLY_TO` | — | email | Sender identity |
+| `BU_EMAIL_DAILY_LIMIT` | provider-specific | email | Local counter to respect free quotas |
+| `BU_NTFY_URL`, `BU_NTFY_TOKEN` | — | ntfy | Server URL and access token |
+| `BU_TELEGRAM_BOT_TOKEN` | — | telegram | Bot token (secret) |
+| `BU_SMS_GATEWAY_URL`, `BU_SMS_GATEWAY_USERNAME`, `BU_SMS_GATEWAY_PASSWORD` | — | P3 | Android SMS gateway |
 
 ## 9. CI/CD pipeline
 
@@ -461,7 +461,7 @@ flowchart TD
     lint & types & unit & integ & sec & budget & docs --> preview["Vercel preview deploy<br/>uses staging DB"]
     preview --> review{"Review and merge"}
     review --> main["Push to main"]
-    main --> migS["Migrate staging<br/>chatanalyzer migrate up"]
+    main --> migS["Migrate staging<br/>betweenus migrate up"]
     migS --> depS["Deploy staging"]
     depS --> smoke["Smoke tests<br/>readyz, import fixture, Q&A with LLM none"]
     smoke --> gate{"Approval:<br/>production environment"}
@@ -470,7 +470,7 @@ flowchart TD
     migP --> depP["vercel deploy --prod<br/>API then web"]
     depP --> verify["Post-deploy checks<br/>synthetic probe, error rate"]
     verify -->|"fail"| rollback["Auto rollback<br/>vercel rollback"]
-    verify -->|"ok"| done["Annotate dashboards<br/>with ca_build_info"]
+    verify -->|"ok"| done["Annotate dashboards<br/>with bu_build_info"]
     tag["Tag vX.Y.Z"] --> rel["Release workflow<br/>GoReleaser binaries, Docker image,<br/>SBOM CycloneDX, changelog"]
 ```
 
@@ -479,15 +479,15 @@ Notes:
 - PR previews never touch production data; the staging database contains only synthetic fixtures.
 - `vercel deploy` from Actions uses `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_API`,
   `VERCEL_PROJECT_ID_WEB` (environment secrets).
-- Release artefacts: `chatanalyzer_<os>_<arch>` for macOS (arm64/amd64), Linux (amd64/arm64), Windows (amd64),
+- Release artefacts: `betweenus_<os>_<arch>` for macOS (arm64/amd64), Linux (amd64/arm64), Windows (amd64),
   with the web UI embedded; cosign signing in P2 (SEC-007).
 
 ## 10. Database migrations on deploy
 
 - Tool: `goose`, migrations in `backend/migrations/{postgres,sqlite}/` (forward-only, NFR-REL-004).
-- **Local:** `CA_MIGRATE_ON_START=true` — on startup the binary first copies the SQLite file to
-  `chatanalyzer.db.bak-<fromVersion>`, then migrates inside a transaction.
-- **Hosted:** migrations run from GitHub Actions (`chatanalyzer migrate up`) using `CA_DB_MIGRATE_DSN`, holding a
+- **Local:** `BU_MIGRATE_ON_START=true` — on startup the binary first copies the SQLite file to
+  `betweenus.db.bak-<fromVersion>`, then migrates inside a transaction.
+- **Hosted:** migrations run from GitHub Actions (`betweenus migrate up`) using `BU_DB_MIGRATE_DSN`, holding a
   Postgres advisory lock so concurrent runs are impossible. The app never migrates itself in hosted mode
   (serverless instances would race).
 - **Expand → migrate → contract.** Every schema change must be compatible with the previous app version
@@ -500,7 +500,7 @@ Notes:
 
 | Profile | Upgrade | Rollback |
 |---|---|---|
-| `local` | Replace the binary (or `chatanalyzer self-update` in P2); migrations auto-run with a pre-migration backup copy | Restore the previous binary **and** the `.bak-<version>` DB copy |
+| `local` | Replace the binary (or `betweenus self-update` in P2); migrations auto-run with a pre-migration backup copy | Restore the previous binary **and** the `.bak-<version>` DB copy |
 | `local-full` | `docker compose pull && docker compose up -d` (pinned tags bumped by PR) | Re-pin the previous tag; restore Postgres from the last `pg_dump` if a migration must be undone |
 | `cloud-free` | CI pipeline (§9) | `vercel rollback` / "Instant Rollback" to the previous production deployment (app only — schema stays, safe because of expand/contract) |
 | `cloud-free-container` | Render/Koyeb auto-deploy from a release tag or image | Redeploy the previous image tag |
@@ -511,7 +511,7 @@ Notes:
 - **Hosted runtime secrets** live in Vercel (type *Sensitive* — not readable after save) or the container host's
   secret store. **CI secrets** live in GitHub Environment secrets, scoped to `staging` / `production`.
 - **Local:** `.env` file (0600) or OS keychain integration (P2). The local session secret and future master key
-  are generated on first run into `CA_DATA_DIR/keys/` with 0600 permissions.
+  are generated on first run into `BU_DATA_DIR/keys/` with 0600 permissions.
 - **Optional encrypted config in git:** SOPS + age (both FOSS) for operators who want GitOps for secrets.
 - **Rotation:** every secret has a documented rotation procedure in `docs/runbooks/rotate-secrets.md` (P2); JWT
   verification via JWKS means Supabase key rotation needs no app change.
@@ -524,13 +524,13 @@ point-in-time history within its free limits. The project therefore ships its ow
 
 | Aspect | Design |
 |---|---|
-| Mechanism | `chatanalyzer admin backup` → `pg_dump --format=custom` of the `app` schema → streamed through **age** encryption (recipient public key) → never written unencrypted to disk |
+| Mechanism | `betweenus admin backup` → `pg_dump --format=custom` of the `app` schema → streamed through **age** encryption (recipient public key) → never written unencrypted to disk |
 | Where it runs | **Recommended:** on the operator's own machine via cron/launchd (`scripts/backup.sh`). **Optional:** the `backup.yml` workflow — only in a **private** repository, because artifacts of public repos can be downloaded by others (even though encrypted, size and timing leak) |
 | Where it's stored | Operator-controlled storage (local disk, NAS, a restic repository, or object storage you control) |
 | Retention | 7 daily + 4 weekly → maximum age **35 days** |
 | Key handling | age **private key never in CI**; only the public recipient is a secret in CI. Losing the private key = losing backups (documented) |
-| Restore drill | Quarterly: restore into the staging project and run `chatanalyzer admin verify-restore` (row counts, RLS checks) |
-| Local profile | The DB is a single file; back up `CA_DATA_DIR` with any tool (Time Machine, restic). Encrypted SQLite (P2) protects copies |
+| Restore drill | Quarterly: restore into the staging project and run `betweenus admin verify-restore` (row counts, RLS checks) |
+| Local profile | The DB is a single file; back up `BU_DATA_DIR` with any tool (Time Machine, restic). Encrypted SQLite (P2) protects copies |
 
 **Privacy implications (PRV-006).** A deleted chat disappears from the live DB within 24 h but survives in
 encrypted backups until they age out (≤ 35 days). This is disclosed in the privacy notice and the deletion
@@ -561,12 +561,12 @@ No domain is required: the app works on `*.vercel.app`. When you buy one (e.g. `
    records Vercel shows (typically an `A` record for the apex and a `CNAME` for subdomains; use the exact values
    displayed in the dashboard, which can be project-specific). Vercel issues TLS automatically.
 2. **API:** keep it behind the web rewrite (recommended — nothing to change), or add `api.example.com` to the API
-   project / Render / Koyeb with a `CNAME` to the host they show, then set `CA_CORS_ORIGINS=https://example.com`.
-3. **App config:** update `CA_PUBLIC_BASE_URL`, the rewrite `destination` if you used an API subdomain, Supabase
+   project / Render / Koyeb with a `CNAME` to the host they show, then set `BU_CORS_ORIGINS=https://example.com`.
+3. **App config:** update `BU_PUBLIC_BASE_URL`, the rewrite `destination` if you used an API subdomain, Supabase
    Auth Site URL and redirect URLs, the Grafana synthetic check URL, and OAuth client redirect URIs (`oidc`).
 4. **Cookies:** keep host-only cookies (no `Domain=` attribute) unless the API is on a separate subdomain.
 5. **Email:** verify the domain with your email provider and publish **SPF**, **DKIM** and **DMARC** records
-   (see [Notifications §9](09-notifications.md#9-deliverability)); switch `CA_EMAIL_FROM` to
+   (see [Notifications §9](09-notifications.md#9-deliverability)); switch `BU_EMAIL_FROM` to
    `notifications@mail.example.com`.
 6. **HSTS preload** only after everything works on HTTPS for a few weeks.
 
@@ -578,9 +578,9 @@ The reference deployment is designed so that exceeding a free tier causes **degr
 |---|---|
 | No payment methods | Don't add cards to Vercel, Supabase, Grafana Cloud, GitHub. Hobby/free tiers then pause or stop at limits instead of billing. |
 | LLM spend | Default provider `ollama`/`none`; per-tenant token quotas (MT-005); `LlmDailyCostBudget` alert at `$0`; provider-side spend caps where offered. |
-| DB size | `CA_DB_SIZE_LIMIT_BYTES` + `DbSizeNearLimit` alert at 80%; per-tenant message quotas (default 5 chats / 500k messages, NFR-PERF-006); raw exports not stored (FR-ING-014). |
+| DB size | `BU_DB_SIZE_LIMIT_BYTES` + `DbSizeNearLimit` alert at 80%; per-tenant message quotas (default 5 chats / 500k messages, NFR-PERF-006); raw exports not stored (FR-ING-014). |
 | Function usage | Pump budget per call (20 s) and rate limits keep active-CPU well under 4 h/month for personal use; `vercel` usage dashboard checked by the monthly verification issue. |
 | Telemetry | Series budget ≤ 4,000 enforced in CI; log sampling; trace sampling 20% for HTTP. |
-| Email | `CA_EMAIL_DAILY_LIMIT` counter below the provider cap; digests deferred when near the limit. |
+| Email | `BU_EMAIL_DAILY_LIMIT` counter below the provider cap; digests deferred when near the limit. |
 | CI | Public repo (free minutes); caches; skip heavy jobs on docs-only changes. |
 | Visibility | `overview.json` has a "free-tier headroom" row (DB size, series count, email quota, LLM cost). |

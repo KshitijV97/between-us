@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/between-us/backend/internal/ingest"
 )
 
 // Sender lexicon (docs/parsers/whatsapp.md §5).

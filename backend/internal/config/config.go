@@ -3,7 +3,7 @@
 // authoritative variable reference).
 //
 // Loading is a pure function of a lookup callback so tests never touch the real
-// environment. A deployment profile (CA_PROFILE) supplies safe defaults; any
+// environment. A deployment profile (BU_PROFILE) supplies safe defaults; any
 // explicitly set variable overrides the profile default.
 package config
 
@@ -41,7 +41,7 @@ const (
 	ModeHosted Mode = "hosted"
 )
 
-// DefaultPort is the port used when neither CA_HTTP_ADDR nor PORT is set.
+// DefaultPort is the port used when neither BU_HTTP_ADDR nor PORT is set.
 // 7420 is unusual enough to avoid clashing with common dev servers.
 const DefaultPort = "7420"
 
@@ -53,7 +53,7 @@ type Config struct {
 	// reported as the telemetry attribute deployment.environment.name.
 	Env string
 
-	// HTTPAddr is the listen address for `chatanalyzer serve`.
+	// HTTPAddr is the listen address for `betweenus serve`.
 	HTTPAddr string
 	// PublicBaseURL is the externally reachable URL used in links.
 	PublicBaseURL string
@@ -102,57 +102,57 @@ func Load(lookup Lookup) (Config, error) {
 		return strings.TrimSpace(v)
 	}
 
-	profile := Profile(orDefault(get("CA_PROFILE"), string(ProfileLocal)))
+	profile := Profile(orDefault(get("BU_PROFILE"), string(ProfileLocal)))
 	d, ok := profileDefaults[profile]
 	if !ok {
-		return Config{}, fmt.Errorf("CA_PROFILE=%q: must be one of local, local-full, cloud-free, cloud-free-container", profile)
+		return Config{}, fmt.Errorf("BU_PROFILE=%q: must be one of local, local-full, cloud-free, cloud-free-container", profile)
 	}
 
 	var errs []error
 	cfg := Config{
 		Profile:       profile,
-		Mode:          Mode(orDefault(get("CA_MODE"), string(d.mode))),
-		Env:           orDefault(get("CA_ENV"), d.env),
-		HTTPAddr:      resolveAddr(get("CA_HTTP_ADDR"), get("PORT"), d.host),
-		PublicBaseURL: get("CA_PUBLIC_BASE_URL"),
-		LogFormat:     LogFormat(orDefault(get("CA_LOG_FORMAT"), string(d.logFormat))),
+		Mode:          Mode(orDefault(get("BU_MODE"), string(d.mode))),
+		Env:           orDefault(get("BU_ENV"), d.env),
+		HTTPAddr:      resolveAddr(get("BU_HTTP_ADDR"), get("PORT"), d.host),
+		PublicBaseURL: get("BU_PUBLIC_BASE_URL"),
+		LogFormat:     LogFormat(orDefault(get("BU_LOG_FORMAT"), string(d.logFormat))),
 		DB: DBConfig{
-			Driver: orDefault(get("CA_DB_DRIVER"), d.dbDriver),
-			DSN:    orDefault(get("CA_DB_DSN"), d.dbDSN),
+			Driver: orDefault(get("BU_DB_DRIVER"), d.dbDriver),
+			DSN:    orDefault(get("BU_DB_DSN"), d.dbDSN),
 		},
 	}
 
-	cfg.DataDir = get("CA_DATA_DIR")
+	cfg.DataDir = get("BU_DATA_DIR")
 	if cfg.DataDir == "" {
 		cfg.DataDir = defaultDataDir()
 	}
 	// The local SQLite file lives in the data directory unless a DSN is given.
 	if cfg.DB.Driver == "sqlite" && cfg.DB.DSN == "" {
-		cfg.DB.DSN = "file:" + filepath.Join(cfg.DataDir, "chatanalyzer.db")
+		cfg.DB.DSN = "file:" + filepath.Join(cfg.DataDir, "betweenus.db")
 	}
 
 	if cfg.PublicBaseURL == "" {
 		cfg.PublicBaseURL = "http://" + loopbackFor(cfg.HTTPAddr)
 	}
 
-	if err := cfg.LogLevel.UnmarshalText([]byte(orDefault(get("CA_LOG_LEVEL"), "info"))); err != nil {
-		errs = append(errs, fmt.Errorf("CA_LOG_LEVEL: %w", err))
+	if err := cfg.LogLevel.UnmarshalText([]byte(orDefault(get("BU_LOG_LEVEL"), "info"))); err != nil {
+		errs = append(errs, fmt.Errorf("BU_LOG_LEVEL: %w", err))
 	}
 
 	cfg.MigrateOnStart = cfg.Mode == ModeLocal
-	if v := get("CA_MIGRATE_ON_START"); v != "" {
+	if v := get("BU_MIGRATE_ON_START"); v != "" {
 		b, err := strconv.ParseBool(v)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("CA_MIGRATE_ON_START=%q: must be true or false", v))
+			errs = append(errs, fmt.Errorf("BU_MIGRATE_ON_START=%q: must be true or false", v))
 		}
 		cfg.MigrateOnStart = b
 	}
 
 	cfg.DB.MaxConns = d.dbMaxConns
-	if v := get("CA_DB_MAX_CONNS"); v != "" {
+	if v := get("BU_DB_MAX_CONNS"); v != "" {
 		n, err := strconv.Atoi(v)
 		if err != nil || n < 1 {
-			errs = append(errs, fmt.Errorf("CA_DB_MAX_CONNS=%q: must be a positive integer", v))
+			errs = append(errs, fmt.Errorf("BU_DB_MAX_CONNS=%q: must be a positive integer", v))
 		}
 		cfg.DB.MaxConns = n
 	}
@@ -168,27 +168,27 @@ func Load(lookup Lookup) (Config, error) {
 func (c Config) validate() []error {
 	var errs []error
 	if c.Mode != ModeLocal && c.Mode != ModeHosted {
-		errs = append(errs, fmt.Errorf("CA_MODE=%q: must be local or hosted", c.Mode))
+		errs = append(errs, fmt.Errorf("BU_MODE=%q: must be local or hosted", c.Mode))
 	}
 	if c.LogFormat != LogText && c.LogFormat != LogJSON {
-		errs = append(errs, fmt.Errorf("CA_LOG_FORMAT=%q: must be text or json", c.LogFormat))
+		errs = append(errs, fmt.Errorf("BU_LOG_FORMAT=%q: must be text or json", c.LogFormat))
 	}
 	if c.DB.Driver != "sqlite" && c.DB.Driver != "postgres" {
-		errs = append(errs, fmt.Errorf("CA_DB_DRIVER=%q: must be sqlite or postgres", c.DB.Driver))
+		errs = append(errs, fmt.Errorf("BU_DB_DRIVER=%q: must be sqlite or postgres", c.DB.Driver))
 	}
 	if _, _, err := net.SplitHostPort(c.HTTPAddr); err != nil {
-		errs = append(errs, fmt.Errorf("CA_HTTP_ADDR=%q: %w", c.HTTPAddr, err))
+		errs = append(errs, fmt.Errorf("BU_HTTP_ADDR=%q: %w", c.HTTPAddr, err))
 	}
 	if u, err := url.Parse(c.PublicBaseURL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
-		errs = append(errs, fmt.Errorf("CA_PUBLIC_BASE_URL=%q: must be an absolute http(s) URL", c.PublicBaseURL))
+		errs = append(errs, fmt.Errorf("BU_PUBLIC_BASE_URL=%q: must be an absolute http(s) URL", c.PublicBaseURL))
 	}
 	// Cloud profiles have ephemeral filesystems, so a SQLite file would be lost
 	// on every deploy or scale-to-zero (docs/07-deployment.md §5.1).
 	if (c.Profile == ProfileCloudFree || c.Profile == ProfileCloudFreeContainer) && c.DB.Driver != "postgres" {
-		errs = append(errs, fmt.Errorf("CA_DB_DRIVER=%q: profile %s requires postgres", c.DB.Driver, c.Profile))
+		errs = append(errs, fmt.Errorf("BU_DB_DRIVER=%q: profile %s requires postgres", c.DB.Driver, c.Profile))
 	}
 	if c.DB.Driver == "postgres" && c.DB.DSN == "" {
-		errs = append(errs, errors.New("CA_DB_DSN: required when CA_DB_DRIVER=postgres"))
+		errs = append(errs, errors.New("BU_DB_DSN: required when BU_DB_DRIVER=postgres"))
 	}
 	return errs
 }
@@ -215,7 +215,7 @@ var profileDefaults = map[Profile]defaults{
 	ProfileCloudFreeContainer: {ModeHosted, "production", "0.0.0.0", LogJSON, "postgres", "", 10},
 }
 
-// resolveAddr applies the precedence CA_HTTP_ADDR > PORT > profile default.
+// resolveAddr applies the precedence BU_HTTP_ADDR > PORT > profile default.
 // PORT is set by Vercel, Render and Koyeb and only replaces the port.
 func resolveAddr(explicit, port, host string) string {
 	if explicit != "" {
@@ -240,7 +240,7 @@ func loopbackFor(addr string) string {
 // ~/Library/Application Support on macOS, %AppData% on Windows, and
 // $XDG_DATA_HOME (default ~/.local/share) on Linux and other Unixes.
 func defaultDataDir() string {
-	const app = "chatanalyzer"
+	const app = "betweenus"
 	switch runtime.GOOS {
 	case "darwin", "windows":
 		if dir, err := os.UserConfigDir(); err == nil {

@@ -86,11 +86,11 @@ jobs:
           path: backend/internal/webui/dist
       - name: Build
         working-directory: backend
-        run: CGO_ENABLED=0 go build -trimpath -o ../bin/chatanalyzer ./cmd/chatanalyzer
+        run: CGO_ENABLED=0 go build -trimpath -o ../bin/betweenus ./cmd/betweenus
       - name: Smoke test
         run: |
-          ./bin/chatanalyzer version
-          ./bin/chatanalyzer serve & pid=$!
+          ./bin/betweenus version
+          ./bin/betweenus serve & pid=$!
           trap 'kill $pid' EXIT
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:7420/healthz && break; sleep 0.5; done
           curl -fsS http://127.0.0.1:7420/api/v1/system/info
@@ -99,14 +99,14 @@ jobs:
           echo "smoke test passed"
       - name: CLI import smoke test (synthetic chat)
         env:
-          CA_DATA_DIR: ${{ runner.temp }}/ca-data
+          BU_DATA_DIR: ${{ runner.temp }}/ca-data
         run: |
           (cd backend && go run ./cmd/synthchat -format whatsapp -n 2000) > "$RUNNER_TEMP/WhatsApp Chat with Bob.txt"
-          ./bin/chatanalyzer import -tz Asia/Kolkata "$RUNNER_TEMP/WhatsApp Chat with Bob.txt"
-          ./bin/chatanalyzer chats | grep -q 'Bob'
+          ./bin/betweenus import -tz Asia/Kolkata "$RUNNER_TEMP/WhatsApp Chat with Bob.txt"
+          ./bin/betweenus chats | grep -q 'Bob'
           # Re-import must add nothing (FR-ING-010).
-          chat_id="$(./bin/chatanalyzer chats | awk 'NR==2{print $1}')"
-          ./bin/chatanalyzer import -json -tz Asia/Kolkata -chat "$chat_id" "$RUNNER_TEMP/WhatsApp Chat with Bob.txt" \
+          chat_id="$(./bin/betweenus chats | awk 'NR==2{print $1}')"
+          ./bin/betweenus import -json -tz Asia/Kolkata -chat "$chat_id" "$RUNNER_TEMP/WhatsApp Chat with Bob.txt" \
             | grep -q '"inserted": 0'
 
   security:
@@ -147,6 +147,6 @@ jobs:
         with:
           context: .
           push: false
-          tags: chatanalyzer:ci
+          tags: betweenus:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -40,8 +40,8 @@ import (
 	sqlite "modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/tenancy"
+	"github.com/kshitijv97/between-us/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/tenancy"
 )
 
 //go:embed migrations/*.sql
@@ -85,8 +85,8 @@ func WithReaders(n int) Option {
 }
 
 // Open opens (creating if needed) the database at dsn. dsn may be a plain path
-// ("chatanalyzer.db"), a "file:" URI, or ":memory:". It does not migrate; call
-// Migrate (or rely on CA_MIGRATE_ON_START in the caller).
+// ("betweenus.db"), a "file:" URI, or ":memory:". It does not migrate; call
+// Migrate (or rely on BU_MIGRATE_ON_START in the caller).
 func Open(ctx context.Context, dsn string, opts ...Option) (*Store, error) {
 	o := options{readers: 4}
 	for _, opt := range opts {

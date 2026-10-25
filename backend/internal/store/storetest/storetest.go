@@ -24,8 +24,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/tenancy"
+	"github.com/kshitijv97/between-us/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/tenancy"
 )
 
 // TenantCreator is implemented by stores that can create additional tenants.

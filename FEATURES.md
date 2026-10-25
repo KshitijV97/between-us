@@ -1,6 +1,6 @@
 # Feature log
 
-What Chat Analyzer can do today, what is planned next, and ideas being considered. For the dated, commit-level
+What Between Us can do today, what is planned next, and ideas being considered. For the dated, commit-level
 history see the [changelog](CHANGELOG.md); for scope and requirement IDs see the
 [requirements](docs/01-requirements.md) and [roadmap](docs/10-roadmap.md).
 
@@ -14,14 +14,14 @@ history see the [changelog](CHANGELOG.md); for scope and requirement IDs see the
 
 | Feature | How to use | Requirements |
 |---|---|---|
-| **WhatsApp import:** `.txt` and `.zip`, Android and iOS, 12/24-hour clocks, automatic date-order detection, multi-line messages, system messages, edited/deleted markers, calls, media placeholders, DST-safe times | `chatanalyzer import <file>` | FR-ING-002…005, FR-ING-009 |
-| **Telegram import:** Desktop JSON export (streamed, so very large files are fine), replies, edits, reactions, calls, polls; picks one chat from a full-account export | `chatanalyzer import result.json` (`-telegram-chat <id>` for full exports) | FR-ING-006 |
+| **WhatsApp import:** `.txt` and `.zip`, Android and iOS, 12/24-hour clocks, automatic date-order detection, multi-line messages, system messages, edited/deleted markers, calls, media placeholders, DST-safe times | `betweenus import <file>` | FR-ING-002…005, FR-ING-009 |
+| **Telegram import:** Desktop JSON export (streamed, so very large files are fine), replies, edits, reactions, calls, polls; picks one chat from a full-account export | `betweenus import result.json` (`-telegram-chat <id>` for full exports) | FR-ING-006 |
 | **Preview before importing:** detected format, participants, period, date order and warnings; nothing is written | `-dry-run` | FR-ING-011 |
 | **Safe zip handling:** nothing is extracted to disk; size, count and compression limits; path-traversal and symlink guards; media counted, not stored | automatic | FR-ING-005, SEC-003 |
 | **Incremental re-import:** importing a newer export of the same chat adds only new messages, even with a different timezone | `-chat <id>` | FR-ING-010 |
 | **Mark yourself and pick participants:** "this is me", and choose two senders from a group export | `-me <key>`, `-participants a,b` | FR-ING-008, FR-ING-012 |
-| **Chat library (CLI):** list chats and permanently delete one with all its messages | `chatanalyzer chats`, `chats delete <id>` | FR-LIB-001, FR-LIB-002 |
-| **Local database:** a single SQLite file in your OS app-data folder, full-text index, tenant isolation built in from day one | `CA_DATA_DIR` to relocate | ADR-0003, MT-001 |
+| **Chat library (CLI):** list chats and permanently delete one with all its messages | `betweenus chats`, `chats delete <id>` | FR-LIB-001, FR-LIB-002 |
+| **Local database:** a single SQLite file in your OS app-data folder, full-text index, tenant isolation built in from day one | `BU_DATA_DIR` to relocate | ADR-0003, MT-001 |
 | **Privacy by default:** the export file is never kept; no network calls; message text never appears in logs | automatic | FR-ING-014, PRV-001, PRV-007 |
 | **Fictional demo data:** generate realistic synthetic chats of any size | `make demo`, `go run ./cmd/synthchat` | NFR-MNT-002 |
 
@@ -29,11 +29,11 @@ history see the [changelog](CHANGELOG.md); for scope and requirement IDs see the
 
 | Feature | Notes |
 |---|---|
-| Single binary `chatanalyzer` with the web UI embedded | ~12 MB; ~11 MB RAM when idle |
+| Single binary `betweenus` with the web UI embedded | ~12 MB; ~11 MB RAM when idle |
 | Health, readiness and version endpoints | `/healthz`, `/readyz`, `/version` |
 | Hardened HTTP layer | Security headers, request IDs, JSON problem errors, panic recovery, graceful shutdown |
 | Web app shell (React + TypeScript) | Shows API status; light/dark theme |
-| Configuration profiles | `CA_PROFILE`: local, local-full, cloud-free or cloud-free-container ([.env.example](.env.example)) |
+| Configuration profiles | `BU_PROFILE`: local, local-full, cloud-free or cloud-free-container ([.env.example](.env.example)) |
 | Container image | ~9 MB distroless image (`make docker`) |
 | CI and security gates | Lint, tests, smoke tests, gosec, gitleaks, OSV, govulncheck, CodeQL, Dependabot, release-please |
 | Documentation set | Requirements, architecture, data model, metrics, AI, observability, deployment, security, notifications, roadmap, ADRs |

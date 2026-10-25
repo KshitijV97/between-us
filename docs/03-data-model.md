@@ -1,4 +1,4 @@
-# Chat Analyzer — Data Model
+# Between Us — Data Model
 
 | Field | Value |
 |---|---|
@@ -637,7 +637,7 @@ Defence in depth (MT-001, MT-002, acceptance criterion 7):
 
 ```sql
 -- Roles: owner runs migrations; app serves requests; worker claims jobs.
-CREATE ROLE chatanalyzer_app LOGIN NOBYPASSRLS;
+CREATE ROLE betweenus_app LOGIN NOBYPASSRLS;
 
 -- Helper: NULL when unset, so policies deny instead of erroring.
 CREATE FUNCTION app.current_tenant() RETURNS uuid
@@ -657,7 +657,7 @@ CREATE POLICY self_only ON app.users
     USING (id = NULLIF(current_setting('app.user_id', true), '')::uuid);
 
 -- Audit log is append-only for the app role.
-REVOKE UPDATE, DELETE ON app.audit_log FROM chatanalyzer_app;
+REVOKE UPDATE, DELETE ON app.audit_log FROM betweenus_app;
 ```
 
 **Cross-tenant workers.** Job claiming must see all tenants' queued jobs. Instead of granting `BYPASSRLS`, a `SECURITY DEFINER` function claims one job and returns its `tenant_id`; the worker then sets `app.tenant_id` and does the work under RLS:
@@ -735,13 +735,13 @@ Estimates for planning; validate with real fixtures in MVP.
 | Chunks: 1 per ~20 messages, `halfvec(384)` + HNSW | ~2 KB/chunk → 500k msgs ≈ 50 MB | float32 BLOB ≈ 1.6 KB/chunk ≈ 40 MB |
 | Insights + Q&A | typically < 5 MB per chat | same |
 
-**Implications.** With a ~500 MB free-tier database (planning budget; verified limits in [07-deployment.md](07-deployment.md)), one hosted instance comfortably holds **one or two tenants at the full default quota**, or many tenants with smaller chats. Mitigations: `max_storage_bytes` quota per tenant, a `DB size vs limit` alert (NFR-OBS-005), embeddings optional, smaller embedding dimension, and lowering `CA_QUOTA_MESSAGES` for public instances.
+**Implications.** With a ~500 MB free-tier database (planning budget; verified limits in [07-deployment.md](07-deployment.md)), one hosted instance comfortably holds **one or two tenants at the full default quota**, or many tenants with smaller chats. Mitigations: `max_storage_bytes` quota per tenant, a `DB size vs limit` alert (NFR-OBS-005), embeddings optional, smaller embedding dimension, and lowering `BU_QUOTA_MESSAGES` for public instances.
 
 ## 9. Migrations
 
 - Tool: [`pressly/goose`](https://github.com/pressly/goose) (MIT) used as a library; SQL files embedded with `embed.FS`.
 - Layout: `backend/internal/store/migrations/sqlite/NNNNN_name.sql` and `.../postgres/NNNNN_name.sql`; the **same version numbers** in both dialects so the schema version is comparable.
-- Execution: automatically at startup (`CA_MIGRATE_ON_START=true`) or `chatanalyzer migrate up`; Postgres uses an advisory lock so concurrent serverless instances do not race. On Vercel, run migrations from CI before promoting a deployment instead of at cold start.
+- Execution: automatically at startup (`BU_MIGRATE_ON_START=true`) or `betweenus migrate up`; Postgres uses an advisory lock so concurrent serverless instances do not race. On Vercel, run migrations from CI before promoting a deployment instead of at cold start.
 - Policy: **forward-only** in production (NFR-REL-004); `-- +goose Down` sections exist only for local development. Breaking changes follow expand → migrate data (job) → contract across releases.
 - RLS policies, roles and `SECURITY DEFINER` functions are part of Postgres migrations, so a fresh database is always isolated.
 - CI: store contract tests run the full migration chain on SQLite and on Postgres (service container) and compare a schema snapshot.

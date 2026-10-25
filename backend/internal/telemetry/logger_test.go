@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
+	"github.com/kshitijv97/between-us/backend/internal/config"
 )
 
 func TestJSONLoggerAddsServiceAndRequestID(t *testing.T) {
@@ -24,7 +24,7 @@ func TestJSONLoggerAddsServiceAndRequestID(t *testing.T) {
 	for k, want := range map[string]any{
 		"msg":                         "hello",
 		"request_id":                  "req-123",
-		"service.name":                "chatanalyzer",
+		"service.name":                "between-us",
 		"deployment.environment.name": "test",
 		"count":                       float64(3),
 	} {

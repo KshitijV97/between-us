@@ -1,4 +1,4 @@
-# Chat Analyzer
+# Between Us
 
 > Understand a two-person conversation: metrics, relationship patterns, mood and mind over time, and
 > questions answered with citations, from a WhatsApp or Telegram chat export. Local-first, lean, and free to host.
@@ -39,15 +39,15 @@ Other targets: `make test`, `make lint`, `make vuln`, `make check` (everything C
 ### Import a chat (CLI)
 
 ```bash
-./bin/chatanalyzer import -dry-run "WhatsApp Chat with Bob.zip"
+./bin/betweenus import -dry-run "WhatsApp Chat with Bob.zip"
 ```
 
 `-dry-run` shows the detected format, participants, period and warnings without writing anything. Drop it to
 import; add `-tz Asia/Kolkata` if the phone that exported the chat was in a different timezone from this
 computer, and `-me <key>` to mark yourself. Re-importing a newer export of the same chat with
-`-chat <id>` adds only the new messages. `chatanalyzer chats` lists chats and `chatanalyzer chats delete <id>`
+`-chat <id>` adds only the new messages. `betweenus chats` lists chats and `betweenus chats delete <id>`
 removes one with all of its messages. Data lives in your OS's per-user app-data folder (override with
-`CA_DATA_DIR`).
+`BU_DATA_DIR`).
 
 No real chat handy? Generate a fictional one:
 
@@ -72,7 +72,7 @@ flowchart LR
     api -. outbox .-> notify["Email, ntfy,<br/>Telegram, SMS"]
 ```
 
-- **Backend:** Go, one small binary (`chatanalyzer serve | migrate | import | worker`).
+- **Backend:** Go, one small binary (`betweenus serve | migrate | import | worker`).
 - **Frontend:** React + TypeScript + Vite, embedded in the binary for local use.
 - **Data:** SQLite locally (zero setup); PostgreSQL on Supabase or Aiven free tier when hosted.
 - **AI:** Ollama locally by default. Any OpenAI-compatible endpoint or Anthropic can be plugged in, or no LLM at all.
@@ -105,8 +105,8 @@ All design documentation lives in [`docs/`](docs/). Start with the requirements.
 ## Repository layout
 
 ```text
-chat-analyzer/
-├── backend/          # Go module: cmd/chatanalyzer + internal/* packages
+between-us/
+├── backend/          # Go module: cmd/betweenus + internal/* packages
 ├── web/              # React + TypeScript + Vite app
 ├── deploy/           # docker-compose, Vercel config, Grafana dashboards and alert rules (M5/M6)
 ├── docs/             # All documentation (this index)

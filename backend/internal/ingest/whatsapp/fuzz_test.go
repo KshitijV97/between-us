@@ -6,7 +6,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/between-us/backend/internal/ingest"
 )
 
 // FuzzParse feeds arbitrary bytes through Detect and the full two-pass parse.

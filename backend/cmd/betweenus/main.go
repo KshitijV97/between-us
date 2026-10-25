@@ -1,4 +1,4 @@
-// Command chatanalyzer is the single binary for every deployment profile
+// Command betweenus is the single binary for every deployment profile
 // (docs/02-architecture.md §2). Subcommands:
 //
 //	serve     run the HTTP API, web UI and in-process workers
@@ -21,11 +21,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/httpapi"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/telemetry"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/webui"
+	"github.com/kshitijv97/between-us/backend/internal/buildinfo"
+	"github.com/kshitijv97/between-us/backend/internal/config"
+	"github.com/kshitijv97/between-us/backend/internal/httpapi"
+	"github.com/kshitijv97/between-us/backend/internal/telemetry"
+	"github.com/kshitijv97/between-us/backend/internal/webui"
 )
 
 // Exit codes follow the BSD sysexits convention for usage errors.
@@ -61,14 +61,14 @@ func run(args []string, stdout, stderr io.Writer) int {
 		usage(stdout)
 		return exitOK
 	default:
-		fmt.Fprintf(stderr, "chatanalyzer: unknown command %q\n\n", cmd)
+		fmt.Fprintf(stderr, "betweenus: unknown command %q\n\n", cmd)
 		usage(stderr)
 		return exitUsage
 	}
 }
 
 func usage(w io.Writer) {
-	fmt.Fprint(w, `Usage: chatanalyzer <command> [flags]
+	fmt.Fprint(w, `Usage: betweenus <command> [flags]
 
 Commands:
   serve     Run the HTTP API and web UI
@@ -98,7 +98,7 @@ func serve(args []string, stderr io.Writer) int {
 	}
 	log := telemetry.NewLogger(stderr, cfg)
 	bi := buildinfo.Get()
-	log.Info("starting chatanalyzer", "version", bi.Version, "commit", bi.ShortCommit(), "ui_embedded", webui.Built())
+	log.Info("starting betweenus", "version", bi.Version, "commit", bi.ShortCommit(), "ui_embedded", webui.Built())
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -150,7 +150,7 @@ func version(args []string, stdout, stderr io.Writer) int {
 		}
 		return exitOK
 	}
-	fmt.Fprintf(stdout, "chatanalyzer %s (commit %s, built %s, %s %s)\n",
+	fmt.Fprintf(stdout, "betweenus %s (commit %s, built %s, %s %s)\n",
 		bi.Version, bi.ShortCommit(), orUnknown(bi.Date), bi.GoVersion, bi.Platform)
 	return exitOK
 }

@@ -1,4 +1,4 @@
-module github.com/kshitijv97/chat-analyzer/backend
+module github.com/kshitijv97/between-us/backend
 
 go 1.26.0
 

@@ -11,9 +11,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/store/storetest"
-	"github.com/kshitijv97/chat-analyzer/backend/internal/tenancy"
+	"github.com/kshitijv97/between-us/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/store/storetest"
+	"github.com/kshitijv97/between-us/backend/internal/tenancy"
 )
 
 // newTestStore opens a migrated store in a fresh temp-file database. A real

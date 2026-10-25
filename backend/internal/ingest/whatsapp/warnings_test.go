@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/between-us/backend/internal/ingest"
 )
 
 // countingSink counts emitted messages.

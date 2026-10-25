@@ -38,14 +38,14 @@ func TestLoadDefaultsToLocalProfile(t *testing.T) {
 }
 
 func TestSQLiteDSNDefaultsToDataDir(t *testing.T) {
-	cfg, err := Load(env(map[string]string{"CA_DATA_DIR": "/tmp/ca-test"}))
+	cfg, err := Load(env(map[string]string{"BU_DATA_DIR": "/tmp/ca-test"}))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if cfg.DataDir != "/tmp/ca-test" || cfg.DB.DSN != "file:/tmp/ca-test/chatanalyzer.db" {
+	if cfg.DataDir != "/tmp/ca-test" || cfg.DB.DSN != "file:/tmp/ca-test/betweenus.db" {
 		t.Errorf("DataDir=%q DSN=%q", cfg.DataDir, cfg.DB.DSN)
 	}
-	cfg, err = Load(env(map[string]string{"CA_DB_DSN": "file:/elsewhere.db"}))
+	cfg, err = Load(env(map[string]string{"BU_DB_DSN": "file:/elsewhere.db"}))
 	if err != nil || cfg.DB.DSN != "file:/elsewhere.db" {
 		t.Errorf("explicit DSN lost: %q %v", cfg.DB.DSN, err)
 	}
@@ -53,7 +53,7 @@ func TestSQLiteDSNDefaultsToDataDir(t *testing.T) {
 
 func TestPortOverridesProfilePortButNotExplicitAddr(t *testing.T) {
 	cfg, err := Load(env(map[string]string{
-		"CA_PROFILE": "cloud-free-container", "CA_DB_DSN": "postgres://x", "PORT": "10000",
+		"BU_PROFILE": "cloud-free-container", "BU_DB_DSN": "postgres://x", "PORT": "10000",
 	}))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
@@ -66,17 +66,17 @@ func TestPortOverridesProfilePortButNotExplicitAddr(t *testing.T) {
 		t.Errorf("PublicBaseURL = %q", cfg.PublicBaseURL)
 	}
 
-	cfg, err = Load(env(map[string]string{"CA_HTTP_ADDR": "127.0.0.1:9000", "PORT": "10000"}))
+	cfg, err = Load(env(map[string]string{"BU_HTTP_ADDR": "127.0.0.1:9000", "PORT": "10000"}))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
 	if cfg.HTTPAddr != "127.0.0.1:9000" {
-		t.Errorf("explicit CA_HTTP_ADDR lost: %q", cfg.HTTPAddr)
+		t.Errorf("explicit BU_HTTP_ADDR lost: %q", cfg.HTTPAddr)
 	}
 }
 
 func TestHostedProfilesDefaultToHostedJSON(t *testing.T) {
-	cfg, err := Load(env(map[string]string{"CA_PROFILE": "cloud-free", "CA_DB_DSN": "postgres://x"}))
+	cfg, err := Load(env(map[string]string{"BU_PROFILE": "cloud-free", "BU_DB_DSN": "postgres://x"}))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -87,15 +87,15 @@ func TestHostedProfilesDefaultToHostedJSON(t *testing.T) {
 
 func TestValidationReportsAllErrors(t *testing.T) {
 	_, err := Load(env(map[string]string{
-		"CA_MODE":         "cluster",
-		"CA_LOG_FORMAT":   "xml",
-		"CA_LOG_LEVEL":    "loud",
-		"CA_DB_MAX_CONNS": "0",
+		"BU_MODE":         "cluster",
+		"BU_LOG_FORMAT":   "xml",
+		"BU_LOG_LEVEL":    "loud",
+		"BU_DB_MAX_CONNS": "0",
 	}))
 	if err == nil {
 		t.Fatal("expected error")
 	}
-	for _, want := range []string{"CA_MODE", "CA_LOG_FORMAT", "CA_LOG_LEVEL", "CA_DB_MAX_CONNS"} {
+	for _, want := range []string{"BU_MODE", "BU_LOG_FORMAT", "BU_LOG_LEVEL", "BU_DB_MAX_CONNS"} {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("error %q does not mention %s", err, want)
 		}
@@ -103,21 +103,21 @@ func TestValidationReportsAllErrors(t *testing.T) {
 }
 
 func TestCloudProfilesRejectSQLite(t *testing.T) {
-	_, err := Load(env(map[string]string{"CA_PROFILE": "cloud-free", "CA_DB_DRIVER": "sqlite"}))
+	_, err := Load(env(map[string]string{"BU_PROFILE": "cloud-free", "BU_DB_DRIVER": "sqlite"}))
 	if err == nil || !strings.Contains(err.Error(), "requires postgres") {
 		t.Fatalf("err = %v, want 'requires postgres'", err)
 	}
 }
 
 func TestUnknownProfile(t *testing.T) {
-	if _, err := Load(env(map[string]string{"CA_PROFILE": "prod"})); err == nil {
+	if _, err := Load(env(map[string]string{"BU_PROFILE": "prod"})); err == nil {
 		t.Fatal("expected error for unknown profile")
 	}
 }
 
 func TestPublicBaseURLMustBeAbsolute(t *testing.T) {
-	_, err := Load(env(map[string]string{"CA_PUBLIC_BASE_URL": "example.com"}))
-	if err == nil || !strings.Contains(err.Error(), "CA_PUBLIC_BASE_URL") {
+	_, err := Load(env(map[string]string{"BU_PUBLIC_BASE_URL": "example.com"}))
+	if err == nil || !strings.Contains(err.Error(), "BU_PUBLIC_BASE_URL") {
 		t.Fatalf("err = %v", err)
 	}
 }

@@ -4,7 +4,7 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "chat-analyzer",
+      "package-name": "between-us",
       "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": true
     }
