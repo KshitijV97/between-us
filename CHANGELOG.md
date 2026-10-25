@@ -7,6 +7,15 @@ each release above "Unreleased" from Conventional Commit messages.
 
 For a feature-by-feature view, including what is planned, see [FEATURES.md](FEATURES.md).
 
+## 1.0.0 (2026-10-25)
+
+
+### Features
+
+* **ingest:** define parser contract, store interface and tenancy scope ([b34bbcf](https://github.com/KshitijV97/between-us/commit/b34bbcfd14fe9a84a39ed2ee5d6bf2f46d60d1f6))
+* M0 foundation — Go API skeleton, React app, CI and security gates ([787a4cf](https://github.com/KshitijV97/between-us/commit/787a4cf2f277cda43209c167f4271730af52aaad))
+* M1 import — WhatsApp and Telegram parsers, SQLite store, import CLI ([d441b98](https://github.com/KshitijV97/between-us/commit/d441b98da6a8ce3ec740a99b9f731568897e7839))
+
 ## [Unreleased]
 
 ### Rename (2026-10-25)
