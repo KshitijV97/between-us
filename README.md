@@ -97,6 +97,8 @@ All design documentation lives in [`docs/`](docs/). Start with the requirements.
 | — | [WhatsApp export format](docs/parsers/whatsapp.md) | Line formats, locale handling, system messages, detection algorithm |
 | — | [Telegram export format](docs/parsers/telegram.md) | `result.json` structure and mapping to the canonical schema |
 | — | [Architecture decisions](docs/adr/README.md) | ADR index |
+| — | [Feature log](FEATURES.md) | What's shipped, what's planned, ideas under consideration |
+| — | [Changelog](CHANGELOG.md) | Dated history of changes per milestone |
 | — | [Contributing](CONTRIBUTING.md) | Repo conventions, commits, comments, tests, docs |
 | — | [Security policy](SECURITY.md) | How to report a vulnerability |
 

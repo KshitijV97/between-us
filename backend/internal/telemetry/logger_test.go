@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/config"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
 )
 
 func TestJSONLoggerAddsServiceAndRequestID(t *testing.T) {

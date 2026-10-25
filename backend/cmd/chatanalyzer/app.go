@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/config"
-	"github.com/kshitijv/chat-analyzer/backend/internal/store"
-	"github.com/kshitijv/chat-analyzer/backend/internal/store/sqlite"
-	"github.com/kshitijv/chat-analyzer/backend/internal/telemetry"
-	"github.com/kshitijv/chat-analyzer/backend/internal/tenancy"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/store/sqlite"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/telemetry"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/tenancy"
 )
 
 // errPostgresNotYet is returned until the Postgres store lands in M5.

@@ -7,7 +7,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
 )
 
 // maxTextBytes caps one message body, matching the WhatsApp parser

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
 )
 
 // resolveDate interprets the raw date fields under order. Two-digit years are

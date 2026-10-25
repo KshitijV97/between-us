@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
 )
 
 // Page size bounds for ListMessages and SearchMessages.

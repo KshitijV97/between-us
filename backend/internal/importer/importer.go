@@ -28,9 +28,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest"
-	"github.com/kshitijv/chat-analyzer/backend/internal/store"
-	"github.com/kshitijv/chat-analyzer/backend/internal/tenancy"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/tenancy"
 )
 
 // Errors returned to callers; their messages are safe to show to users.

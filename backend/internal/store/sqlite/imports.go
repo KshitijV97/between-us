@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
 )
 
 const importColumns = `id, tenant_id, chat_id, created_by, platform, variant, status, timezone, time_precision,

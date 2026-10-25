@@ -28,7 +28,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
 )
 
 // Limits bound what an upload may contain.

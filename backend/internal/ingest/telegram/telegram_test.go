@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
 )
 
 // update rewrites golden files: go test ./internal/ingest/telegram -update

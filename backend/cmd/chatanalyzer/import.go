@@ -19,14 +19,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/importer"
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest"
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest/archive"
-	"github.com/kshitijv/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/importer"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest/archive"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
 
 	// Register parsers with the ingest registry.
-	_ "github.com/kshitijv/chat-analyzer/backend/internal/ingest/telegram"
-	_ "github.com/kshitijv/chat-analyzer/backend/internal/ingest/whatsapp"
+	_ "github.com/kshitijv97/chat-analyzer/backend/internal/ingest/telegram"
+	_ "github.com/kshitijv97/chat-analyzer/backend/internal/ingest/whatsapp"
 )
 
 // importUsage documents `chatanalyzer import` (FR-ING-001).

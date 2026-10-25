@@ -22,7 +22,7 @@ COPY --from=web /src/web/dist/ ./internal/webui/dist/
 ARG VERSION=dev
 ARG COMMIT=""
 RUN go build -trimpath \
-      -ldflags "-s -w -X github.com/kshitijv/chat-analyzer/backend/internal/buildinfo.Version=${VERSION} -X github.com/kshitijv/chat-analyzer/backend/internal/buildinfo.Commit=${COMMIT}" \
+      -ldflags "-s -w -X github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo.Version=${VERSION} -X github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo.Commit=${COMMIT}" \
       -o /out/chatanalyzer ./cmd/chatanalyzer
 
 # --- 3. Runtime ----------------------------------------------------------------

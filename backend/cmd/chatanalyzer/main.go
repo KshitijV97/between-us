@@ -21,11 +21,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/buildinfo"
-	"github.com/kshitijv/chat-analyzer/backend/internal/config"
-	"github.com/kshitijv/chat-analyzer/backend/internal/httpapi"
-	"github.com/kshitijv/chat-analyzer/backend/internal/telemetry"
-	"github.com/kshitijv/chat-analyzer/backend/internal/webui"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/httpapi"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/telemetry"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/webui"
 )
 
 // Exit codes follow the BSD sysexits convention for usage errors.

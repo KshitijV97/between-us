@@ -40,8 +40,8 @@ import (
 	sqlite "modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/store"
-	"github.com/kshitijv/chat-analyzer/backend/internal/tenancy"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/store"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/tenancy"
 )
 
 //go:embed migrations/*.sql

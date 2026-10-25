@@ -16,7 +16,7 @@ UI_DIST := $(BACKEND)/internal/webui/dist
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  ?= $(shell git rev-parse HEAD 2>/dev/null)
 DATE    ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-PKG     := github.com/kshitijv/chat-analyzer/backend/internal/buildinfo
+PKG     := github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo
 LDFLAGS := -s -w -X $(PKG).Version=$(VERSION) -X $(PKG).Commit=$(COMMIT) -X $(PKG).Date=$(DATE)
 
 .PHONY: help

@@ -13,8 +13,8 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/buildinfo"
-	"github.com/kshitijv/chat-analyzer/backend/internal/config"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/buildinfo"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/config"
 )
 
 // ctxKey is unexported so no other package can collide with or forge keys.

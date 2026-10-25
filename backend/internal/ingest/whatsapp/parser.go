@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
 )
 
 // Limits protecting memory and the database from hostile or broken files.

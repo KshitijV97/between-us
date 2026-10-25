@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kshitijv/chat-analyzer/backend/internal/ingest"
+	"github.com/kshitijv97/chat-analyzer/backend/internal/ingest"
 )
 
 // discardSink counts messages without retaining them, so the benchmark
