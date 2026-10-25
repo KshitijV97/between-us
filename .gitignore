@@ -1,0 +1,21 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Never commit real chat exports or secrets
+exports/
+*.zip
+_chat.txt
+result.json
+.env
+.env.*
+!.env.example
+
+# Build output
+bin/
+dist/
+node_modules/
+coverage/
+*.db
+*.db-*
