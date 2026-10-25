@@ -13,9 +13,13 @@ result.json
 !.env.example
 
 # Build output
-bin/
-dist/
+/bin/
+/web/dist/
 node_modules/
 coverage/
+*.out
+# Embedded UI is copied in at build time; only the placeholder is tracked.
+/backend/internal/webui/dist/*
+!/backend/internal/webui/dist/.gitkeep
 *.db
 *.db-*

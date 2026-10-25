@@ -65,6 +65,7 @@ gantt
 | **Requirements** | NFR-MNT-001, NFR-MNT-004, NFR-MNT-005, NFR-MNT-006, SEC-005, SEC-007 (scanning part) |
 | **Exit criteria** | Fresh clone → `make dev` runs an empty API + web page; CI green on `main`; all docs render on GitHub. |
 | **Parallel split** | Agent A: Go skeleton + CI. Agent B: web skeleton + lint/format. Agent C: ADRs + `SECURITY.md`/`CONTRIBUTING.md`. No shared files except root `Makefile` (owned by A). |
+| **Status** | **Done 2026-10-24** on branch `feat/m0-foundation`. Verified locally: `make check`, `make dev`, `make run`, `make docker`. The "CI green on `main`" criterion is pending until the repo is pushed to GitHub. |
 
 ### M1 — Parsers and canonical store
 

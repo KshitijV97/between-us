@@ -1,0 +1,141 @@
+# Continuous integration: lint, test, build and security gates for every push
+# and pull request (NFR-MNT-001, NFR-MNT-006). A nightly run re-scans
+# dependencies so newly published vulnerabilities surface without a code change.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 3 * * *' # nightly vulnerability re-scan
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Go — lint, test, vulns
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then echo "::error::gofmt needed:"; echo "$unformatted"; exit 1; fi
+      - run: go vet ./...
+      - run: go tool staticcheck ./...
+      - run: go test -race -count=1 -coverprofile=coverage.out ./...
+      - name: Coverage summary
+        run: go tool cover -func=coverage.out | tail -1 >> "$GITHUB_STEP_SUMMARY"
+      - run: go tool govulncheck ./...
+
+  web:
+    name: Web — lint, test, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --no-fund
+      - run: npm run -s format:check
+      - run: npm run -s lint
+      - run: npm run -s typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Bundle budget (NFR-PERF-004)
+        run: npm run -s size | tee -a "$GITHUB_STEP_SUMMARY"
+      - run: npm audit --omit=dev --audit-level=high
+      - uses: actions/upload-artifact@v7
+        with:
+          name: web-dist
+          path: web/dist
+          retention-days: 3
+
+  binary:
+    name: Single binary — build and smoke test
+    needs: [backend, web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - uses: actions/download-artifact@v8
+        with:
+          name: web-dist
+          path: backend/internal/webui/dist
+      - name: Build
+        working-directory: backend
+        run: CGO_ENABLED=0 go build -trimpath -o ../bin/chatanalyzer ./cmd/chatanalyzer
+      - name: Smoke test
+        run: |
+          ./bin/chatanalyzer version
+          ./bin/chatanalyzer serve & pid=$!
+          trap 'kill $pid' EXIT
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:7420/healthz && break; sleep 0.5; done
+          curl -fsS http://127.0.0.1:7420/api/v1/system/info
+          curl -fsS http://127.0.0.1:7420/ | grep -q '<div id="root">'
+          curl -fsS http://127.0.0.1:7420/chats/any/route | grep -q '<div id="root">'
+          echo "smoke test passed"
+
+  security:
+    name: Security — gosec, secrets, OSV
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # gitleaks scans the full history
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: gosec
+        working-directory: backend
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.30.0
+          gosec -quiet ./...
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: OSV scanner (Go + npm lockfiles)
+        uses: google/osv-scanner-action/osv-scanner-action@v2.7.0
+        with:
+          scan-args: |-
+            --lockfile=backend/go.mod
+            --lockfile=web/package-lock.json
+
+  docker:
+    name: Container image builds
+    needs: [backend, web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          tags: chatanalyzer:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

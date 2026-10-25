@@ -1,0 +1,76 @@
+/*
+ * Base styles. Design tokens live on :root so a light/dark theme is a token
+ * swap (NFR-UX-001). Tailwind + shadcn/ui replace most of this in M3.
+ */
+:root {
+  --bg: #ffffff;
+  --fg: #111827;
+  --muted: #6b7280;
+  --surface: #f3f4f6;
+  --accent: #4f46e5;
+  --danger: #b91c1c;
+  --radius: 0.5rem;
+
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f19;
+    --fg: #e5e7eb;
+    --muted: #9ca3af;
+    --surface: #161b2a;
+    --accent: #818cf8;
+    --danger: #f87171;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+.shell {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+.tagline {
+  color: var(--muted);
+}
+
+.status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.status > div {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+}
+
+.status dt {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.status dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.status--error {
+  color: var(--danger);
+}

@@ -36,7 +36,7 @@ These conventions apply to all code and docs in this repository. They implement 
 | Analytics | Table-driven tests with hand-computed expectations, including a DST boundary |
 | Tenancy | Isolation tests: tenant A can never read tenant B (repository and RLS layers) |
 | AI | Grounding validator unit tests; offline evaluation set on synthetic chats |
-| Web | Component tests (Vitest + Testing Library); critical flows with Playwright |
+| Web | Component tests (Vitest + Testing Library); critical flows with Playwright (M3) |
 
 ## Docs
 
@@ -45,11 +45,14 @@ These conventions apply to all code and docs in this repository. They implement 
   contain punctuation, and use `<br/>` for line breaks.
 - Significant decisions get an ADR in `docs/adr/` (copy `0000-template.md`).
 
-## Local checks (once code exists)
+## Local checks
 
 ```bash
 make check
 ```
 
-This will run `gofmt`, `go vet`, `golangci-lint`, `go test ./...`, `govulncheck`, plus `pnpm lint`,
-`pnpm typecheck` and `pnpm test` for the web app.
+This runs what CI runs: `gofmt`, `go vet`, `staticcheck`, `go test -race`, `govulncheck`, then Prettier,
+ESLint, `tsc`, Vitest and `npm audit` for the web app. Go tools (`staticcheck`, `govulncheck`) are pinned in
+`backend/go.mod` with the `tool` directive and run via `go tool`, so there is nothing extra to install.
+
+The web app uses **npm** (bundled with Node.js); commit `web/package-lock.json` with dependency changes.

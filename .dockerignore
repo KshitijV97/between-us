@@ -1,0 +1,10 @@
+.git
+**/node_modules
+web/dist
+bin
+backend/internal/webui/dist/*
+!backend/internal/webui/dist/.gitkeep
+docs
+*.md
+.env
+.env.*

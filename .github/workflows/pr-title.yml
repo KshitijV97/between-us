@@ -1,0 +1,20 @@
+# Enforces Conventional Commits on PR titles; squash-merging turns the title
+# into the commit message that release-please reads (NFR-MNT-005).
+name: PR title
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  conventional-title:
+    runs-on: ubuntu-latest
+    steps:
+      # Safe with pull_request_target: this action only reads the PR title and
+      # never checks out or runs the PR's code.
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

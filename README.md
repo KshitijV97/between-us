@@ -3,7 +3,8 @@
 > Understand a two-person conversation: metrics, relationship patterns, mood and mind over time, and
 > questions answered with citations, from a WhatsApp or Telegram chat export. Local-first, lean, and free to host.
 
-**Status:** 📝 Design phase. The requirements and design docs are drafts for review. No application code yet.
+**Status:** 🏗️ Milestone **M0 (foundation)** complete: Go API skeleton, React app, CI and security gates.
+Chat import arrives in M1. See the [roadmap](docs/10-roadmap.md).
 
 ---
 
@@ -16,6 +17,24 @@
 | **Interpret** | Relationship type and how it is evolving, plus the **mood and mind** of each person in any period. Every claim links to the messages behind it. |
 | **Ask** | "What were we worried about in March?" Answers are grounded in the chosen period and cite the messages they rely on. |
 | **Operate** | Multi-tenant workspaces, RBAC, audit log, OpenTelemetry traces/metrics/logs, dashboards and alerts as code, pluggable email/push/SMS notifications. |
+
+## Quick start
+
+Prerequisites: Go (any recent version; the pinned toolchain downloads itself) and Node.js 24.
+
+```bash
+make dev
+```
+
+This runs the Go API on <http://127.0.0.1:7420> and the Vite dev server with hot reload on
+<http://127.0.0.1:5173>. To build the single binary with the UI embedded and run it:
+
+```bash
+make run
+```
+
+Other targets: `make test`, `make lint`, `make vuln`, `make check` (everything CI runs), `make docker`.
+Configuration is via `CA_*` environment variables, documented in [`.env.example`](.env.example).
 
 ## Design at a glance
 
@@ -59,17 +78,22 @@ All design documentation lives in [`docs/`](docs/). Start with the requirements.
 | — | [Telegram export format](docs/parsers/telegram.md) | `result.json` structure and mapping to the canonical schema |
 | — | [Architecture decisions](docs/adr/README.md) | ADR index |
 | — | [Contributing](CONTRIBUTING.md) | Repo conventions, commits, comments, tests, docs |
+| — | [Security policy](SECURITY.md) | How to report a vulnerability |
 
-## Planned repository layout
+## Repository layout
 
 ```text
 chat-analyzer/
 ├── backend/          # Go module: cmd/chatanalyzer + internal/* packages
 ├── web/              # React + TypeScript + Vite app
-├── deploy/           # docker-compose, Vercel config, Grafana dashboards and alert rules
+├── deploy/           # docker-compose, Vercel config, Grafana dashboards and alert rules (M5/M6)
 ├── docs/             # All documentation (this index)
+├── .github/          # CI, CodeQL, release-please, Dependabot
+├── Dockerfile        # Container image (static binary on distroless)
+├── Makefile          # Developer entry points (`make help`)
 ├── README.md
-└── CONTRIBUTING.md
+├── CONTRIBUTING.md
+└── SECURITY.md
 ```
 
 ## Privacy first
