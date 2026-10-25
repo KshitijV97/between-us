@@ -13,6 +13,9 @@ import (
 	"log/slog"
 	"net"
 	"net/url"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -58,7 +61,14 @@ type Config struct {
 	LogLevel  slog.Level
 	LogFormat LogFormat
 
+	// DataDir holds local state: the SQLite database and, if enabled, kept
+	// exports. Created with 0700 permissions by EnsureDataDir.
+	DataDir string
+
 	DB DBConfig
+	// MigrateOnStart applies migrations when `serve` starts. Local default;
+	// hosted deployments migrate from CI instead (docs/07-deployment.md §10).
+	MigrateOnStart bool
 }
 
 // DBConfig holds database connection settings. The store itself arrives in M1;
@@ -112,12 +122,30 @@ func Load(lookup Lookup) (Config, error) {
 		},
 	}
 
+	cfg.DataDir = get("CA_DATA_DIR")
+	if cfg.DataDir == "" {
+		cfg.DataDir = defaultDataDir()
+	}
+	// The local SQLite file lives in the data directory unless a DSN is given.
+	if cfg.DB.Driver == "sqlite" && cfg.DB.DSN == "" {
+		cfg.DB.DSN = "file:" + filepath.Join(cfg.DataDir, "chatanalyzer.db")
+	}
+
 	if cfg.PublicBaseURL == "" {
 		cfg.PublicBaseURL = "http://" + loopbackFor(cfg.HTTPAddr)
 	}
 
 	if err := cfg.LogLevel.UnmarshalText([]byte(orDefault(get("CA_LOG_LEVEL"), "info"))); err != nil {
 		errs = append(errs, fmt.Errorf("CA_LOG_LEVEL: %w", err))
+	}
+
+	cfg.MigrateOnStart = cfg.Mode == ModeLocal
+	if v := get("CA_MIGRATE_ON_START"); v != "" {
+		b, err := strconv.ParseBool(v)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("CA_MIGRATE_ON_START=%q: must be true or false", v))
+		}
+		cfg.MigrateOnStart = b
 	}
 
 	cfg.DB.MaxConns = d.dbMaxConns
@@ -178,7 +206,7 @@ type defaults struct {
 
 var profileDefaults = map[Profile]defaults{
 	// Single binary on a laptop: loopback only, human-readable logs, SQLite.
-	ProfileLocal: {ModeLocal, "local", "127.0.0.1", LogText, "sqlite", "file:chatanalyzer.db", 1},
+	ProfileLocal: {ModeLocal, "local", "127.0.0.1", LogText, "sqlite", "", 1},
 	// Docker Compose: bind all interfaces inside the container, Postgres service.
 	ProfileLocalFull: {ModeHosted, "local", "0.0.0.0", LogJSON, "postgres", "", 10},
 	// Serverless functions: tiny pools because every instance has its own.
@@ -206,6 +234,33 @@ func loopbackFor(addr string) string {
 		host = "127.0.0.1"
 	}
 	return net.JoinHostPort(host, port)
+}
+
+// defaultDataDir follows each OS's convention for per-user application data:
+// ~/Library/Application Support on macOS, %AppData% on Windows, and
+// $XDG_DATA_HOME (default ~/.local/share) on Linux and other Unixes.
+func defaultDataDir() string {
+	const app = "chatanalyzer"
+	switch runtime.GOOS {
+	case "darwin", "windows":
+		if dir, err := os.UserConfigDir(); err == nil {
+			return filepath.Join(dir, app)
+		}
+	default:
+		if xdg := os.Getenv("XDG_DATA_HOME"); xdg != "" {
+			return filepath.Join(xdg, app)
+		}
+		if home, err := os.UserHomeDir(); err == nil {
+			return filepath.Join(home, ".local", "share", app)
+		}
+	}
+	return app // last resort: relative to the working directory
+}
+
+// EnsureDataDir creates the data directory, readable only by the current
+// user because it holds private chat data.
+func (c Config) EnsureDataDir() error {
+	return os.MkdirAll(c.DataDir, 0o700)
 }
 
 func orDefault(v, def string) string {

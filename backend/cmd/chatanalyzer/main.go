@@ -2,9 +2,10 @@
 // (docs/02-architecture.md §2). Subcommands:
 //
 //	serve     run the HTTP API, web UI and in-process workers
+//	import    import a WhatsApp or Telegram export (FR-ING-001)
+//	chats     list or delete imported chats (FR-LIB-001, FR-LIB-002)
+//	migrate   apply database migrations (NFR-REL-004)
 //	version   print build information
-//	migrate   apply database migrations          (milestone M1)
-//	import    import a chat export from the CLI  (milestone M1, FR-ING-001)
 //
 // Configuration comes from CA_* environment variables; see .env.example.
 package main
@@ -29,10 +30,9 @@ import (
 
 // Exit codes follow the BSD sysexits convention for usage errors.
 const (
-	exitOK       = 0
-	exitError    = 1
-	exitUsage    = 2
-	exitNotReady = 69 // EX_UNAVAILABLE: command exists but is not implemented yet
+	exitOK    = 0
+	exitError = 1
+	exitUsage = 2
 )
 
 func main() {
@@ -51,9 +51,12 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return serve(rest, stderr)
 	case "version":
 		return version(rest, stdout, stderr)
-	case "migrate", "import":
-		fmt.Fprintf(stderr, "chatanalyzer %s: not implemented yet (planned for milestone M1, see docs/10-roadmap.md)\n", cmd)
-		return exitNotReady
+	case "import":
+		return importCmd(rest, stdout, stderr)
+	case "chats":
+		return chatsCmd(rest, stdout, stderr)
+	case "migrate":
+		return migrateCmd(stderr)
 	case "help", "-h", "--help":
 		usage(stdout)
 		return exitOK
@@ -69,9 +72,10 @@ func usage(w io.Writer) {
 
 Commands:
   serve     Run the HTTP API and web UI
+  import    Import a WhatsApp or Telegram export (run "import -h" for flags)
+  chats     List chats, or "chats delete <id>"
+  migrate   Apply database migrations
   version   Print build information (-json for machine-readable output)
-  migrate   Apply database migrations (coming in M1)
-  import    Import a WhatsApp or Telegram export (coming in M1)
   help      Show this help
 
 Configuration is read from CA_* environment variables (see .env.example).
@@ -99,7 +103,29 @@ func serve(args []string, stderr io.Writer) int {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	srv := httpapi.New(httpapi.Options{Config: cfg, Logger: log, UI: webui.FS()})
+	checks := map[string]httpapi.ReadinessCheck{}
+	st, err := openStore(ctx, cfg)
+	switch {
+	case errors.Is(err, errPostgresNotYet):
+		// Hosted profiles still serve health and the UI shell; readiness
+		// reports the missing store so no traffic is routed to it.
+		log.Warn("database not available", "reason", err.Error())
+		checks["db"] = func(context.Context) error { return errPostgresNotYet }
+	case err != nil:
+		log.Error("opening database failed", "error", err)
+		return exitError
+	default:
+		defer st.Close()
+		if cfg.MigrateOnStart {
+			if err := st.Migrate(ctx); err != nil {
+				log.Error("migration failed", "error", err)
+				return exitError
+			}
+		}
+		checks["db"] = st.Ping
+	}
+
+	srv := httpapi.New(httpapi.Options{Config: cfg, Logger: log, UI: webui.FS(), Checks: checks})
 	if err := srv.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 		log.Error("server stopped with error", "error", err)
 		return exitError

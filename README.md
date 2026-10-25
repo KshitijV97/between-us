@@ -3,8 +3,9 @@
 > Understand a two-person conversation: metrics, relationship patterns, mood and mind over time, and
 > questions answered with citations, from a WhatsApp or Telegram chat export. Local-first, lean, and free to host.
 
-**Status:** 🏗️ Milestone **M0 (foundation)** complete: Go API skeleton, React app, CI and security gates.
-Chat import arrives in M1. See the [roadmap](docs/10-roadmap.md).
+**Status:** 🏗️ Milestones **M0 (foundation)** and **M1 (import)** complete: WhatsApp and Telegram exports
+import into a local SQLite database from the command line. Analytics and the dashboard come next (M2, M3).
+See the [roadmap](docs/10-roadmap.md).
 
 ---
 
@@ -34,6 +35,25 @@ make run
 ```
 
 Other targets: `make test`, `make lint`, `make vuln`, `make check` (everything CI runs), `make docker`.
+
+### Import a chat (CLI)
+
+```bash
+./bin/chatanalyzer import -dry-run "WhatsApp Chat with Bob.zip"
+```
+
+`-dry-run` shows the detected format, participants, period and warnings without writing anything. Drop it to
+import; add `-tz Asia/Kolkata` if the phone that exported the chat was in a different timezone from this
+computer, and `-me <key>` to mark yourself. Re-importing a newer export of the same chat with
+`-chat <id>` adds only the new messages. `chatanalyzer chats` lists chats and `chatanalyzer chats delete <id>`
+removes one with all of its messages. Data lives in your OS's per-user app-data folder (override with
+`CA_DATA_DIR`).
+
+No real chat handy? Generate a fictional one:
+
+```bash
+cd backend && go run ./cmd/synthchat -format whatsapp -n 5000 > /tmp/demo.txt
+```
 Configuration is via `CA_*` environment variables, documented in [`.env.example`](.env.example).
 
 ## Design at a glance

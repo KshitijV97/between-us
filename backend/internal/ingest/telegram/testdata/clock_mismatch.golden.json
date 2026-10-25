@@ -1,0 +1,104 @@
+{
+  "report": {
+    "platform": "telegram",
+    "variant": "telegram-json-single",
+    "time_precision": "second",
+    "lines_read": 3,
+    "messages": 3,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "user1111111111",
+        "display": "Alice",
+        "message_count": 2
+      },
+      {
+        "key": "user2222222222",
+        "display": "Bob",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2024-01-10T10:00:00Z",
+    "last_at": "2024-01-10T10:02:00Z",
+    "warnings": [
+      "Export times suggest the exporting computer used UTC+05:30; use a timezone with that offset for daily statistics."
+    ],
+    "suggested_title": "Bob"
+  },
+  "diagnostics": [
+    {
+      "Severity": "warning",
+      "Code": "clock_mismatch",
+      "Line": 3,
+      "Detail": "1 messages have local and UTC times that differ by a non-timezone amount; UTC times are used"
+    }
+  ],
+  "messages": [
+    {
+      "Platform": "telegram",
+      "ExternalID": "100",
+      "SentAt": "2024-01-10T10:00:00Z",
+      "LocalTime": "2024-01-10T15:30:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "IST machine, +05:30",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 1
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "101",
+      "SentAt": "2024-01-10T10:01:00Z",
+      "LocalTime": "2024-01-10T15:31:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user2222222222",
+      "SenderDisplay": "Bob",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "same offset",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 2
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "102",
+      "SentAt": "2024-01-10T10:02:00Z",
+      "LocalTime": "2024-01-10T15:39:13Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "clock skew of 7m13s",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 3
+    }
+  ]
+}

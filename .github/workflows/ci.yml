@@ -97,6 +97,17 @@ jobs:
           curl -fsS http://127.0.0.1:7420/ | grep -q '<div id="root">'
           curl -fsS http://127.0.0.1:7420/chats/any/route | grep -q '<div id="root">'
           echo "smoke test passed"
+      - name: CLI import smoke test (synthetic chat)
+        env:
+          CA_DATA_DIR: ${{ runner.temp }}/ca-data
+        run: |
+          (cd backend && go run ./cmd/synthchat -format whatsapp -n 2000) > "$RUNNER_TEMP/WhatsApp Chat with Bob.txt"
+          ./bin/chatanalyzer import -tz Asia/Kolkata "$RUNNER_TEMP/WhatsApp Chat with Bob.txt"
+          ./bin/chatanalyzer chats | grep -q 'Bob'
+          # Re-import must add nothing (FR-ING-010).
+          chat_id="$(./bin/chatanalyzer chats | awk 'NR==2{print $1}')"
+          ./bin/chatanalyzer import -json -tz Asia/Kolkata -chat "$chat_id" "$RUNNER_TEMP/WhatsApp Chat with Bob.txt" \
+            | grep -q '"inserted": 0'
 
   security:
     name: Security — gosec, secrets, OSV

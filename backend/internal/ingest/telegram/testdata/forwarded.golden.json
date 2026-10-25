@@ -1,0 +1,118 @@
+{
+  "report": {
+    "platform": "telegram",
+    "variant": "telegram-json-single",
+    "time_precision": "second",
+    "lines_read": 4,
+    "messages": 4,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "user1111111111",
+        "display": "Alice",
+        "message_count": 2
+      },
+      {
+        "key": "user2222222222",
+        "display": "Bob",
+        "message_count": 2
+      }
+    ],
+    "first_at": "2024-05-01T10:00:00Z",
+    "last_at": "2024-05-01T10:03:00Z",
+    "warnings": [
+      "Export times suggest the exporting computer used UTC+00:00; use a timezone with that offset for daily statistics."
+    ],
+    "suggested_title": "Bob"
+  },
+  "messages": [
+    {
+      "Platform": "telegram",
+      "ExternalID": "60",
+      "SentAt": "2024-05-01T10:00:00Z",
+      "LocalTime": "2024-05-01T10:00:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "Terrible news everyone",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": true,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 1
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "61",
+      "SentAt": "2024-05-01T10:01:00Z",
+      "LocalTime": "2024-05-01T10:01:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user2222222222",
+      "SenderDisplay": "Bob",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "forwarded from a hidden user",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": true,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 2
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "62",
+      "SentAt": "2024-05-01T10:02:00Z",
+      "LocalTime": "2024-05-01T10:02:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "saved",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": true,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 3
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "63",
+      "SentAt": "2024-05-01T10:03:00Z",
+      "LocalTime": "2024-05-01T10:03:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user2222222222",
+      "SenderDisplay": "Bob",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "own words",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 4
+    }
+  ]
+}

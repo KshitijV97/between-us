@@ -23,3 +23,4 @@ coverage/
 !/backend/internal/webui/dist/.gitkeep
 *.db
 *.db-*
+/.demo/

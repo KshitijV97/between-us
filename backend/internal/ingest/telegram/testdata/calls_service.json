@@ -1,0 +1,12 @@
+{
+ "name": "Bob", "type": "personal_chat", "id": 4242424242,
+ "messages": [
+  {"id": 50, "type": "service", "date": "2024-01-05T21:40:00", "date_unixtime": "1704490800", "actor": "Alice", "actor_id": "user1111111111", "action": "phone_call", "duration_seconds": 312, "discard_reason": "hangup", "text": "", "text_entities": []},
+  {"id": 51, "type": "service", "date": "2024-01-05T22:00:00", "date_unixtime": "1704492000", "actor": "Bob", "actor_id": "user2222222222", "action": "phone_call", "discard_reason": "missed", "text": "", "text_entities": []},
+  {"id": 52, "type": "service", "date": "2024-01-05T22:01:00", "date_unixtime": "1704492060", "actor": "Bob", "actor_id": "user2222222222", "action": "phone_call", "discard_reason": "busy", "text": ""},
+  {"id": 53, "type": "service", "date": "2024-01-05T22:02:00", "date_unixtime": "1704492120", "actor": "Alice", "actor_id": "user1111111111", "action": "phone_call", "discard_reason": "disconnect", "duration_seconds": 5, "text": ""},
+  {"id": 54, "type": "service", "date": "2024-01-05T22:03:00", "date_unixtime": "1704492180", "actor": "Alice", "actor_id": "user1111111111", "action": "pin_message", "message_id": 1, "text": "Alice pinned a message"},
+  {"id": 55, "type": "service", "date": "2024-01-05T22:04:00", "date_unixtime": "1704492240", "actor": "Bob", "actor_id": "user2222222222", "action": "clear_history", "text": ""},
+  {"id": 56, "type": "service", "date": "2024-01-05T22:05:00", "date_unixtime": "1704492300", "actor": "Bob", "actor_id": "user2222222222", "action": "screenshot_taken", "text": ""}
+ ]
+}

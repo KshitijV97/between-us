@@ -1,0 +1,20 @@
+{
+ "about": "Here is the data you requested.",
+ "personal_information": {"user_id": 1111111111, "first_name": "Alice", "phone_number": "+15550001111"},
+ "contacts": {"about": "contacts", "list": [{"first_name": "Bob", "phone_number": "+15550002222"}]},
+ "chats": {
+  "about": "This page lists all chats from this export.",
+  "list": [
+   {"name": "Bob", "type": "personal_chat", "id": 4242424242, "messages": [
+     {"id": 1, "type": "message", "date": "2024-01-01T10:00:00", "date_unixtime": "1704103200", "from": "Alice", "from_id": "user1111111111", "text": "hi Bob"},
+     {"id": 2, "type": "message", "date": "2024-01-01T10:05:00", "date_unixtime": "1704103500", "from": "Bob", "from_id": "user2222222222", "text": "hi Alice"}]},
+   {"name": "Hiking Club", "type": "private_supergroup", "id": 1700000000, "messages": [
+     {"id": 1, "type": "message", "date": "2024-01-01T10:00:00", "date_unixtime": "1704103200", "from": "Dave", "from_id": "user4444444444", "text": "GROUP SECRET"}]},
+   {"name": "Carol", "type": "personal_chat", "id": 3333333333, "messages": [
+     {"id": 1, "type": "message", "date": "2024-02-01T10:00:00", "date_unixtime": "1706781600", "from": "Carol", "from_id": "user3333333333", "text": "CAROL SECRET"},
+     {"id": 2, "type": "message", "date": "2024-02-01T10:00:00", "date_unixtime": "1706781600", "from": "Alice", "from_id": "user1111111111", "text": "CAROL SECRET 2", "nested": {"a": [1, [2, {"b": 3}]]}},
+     {"id": 3, "type": "service", "date": "2024-02-01T10:00:00", "date_unixtime": "1706781600", "actor": "Carol", "actor_id": "user3333333333", "action": "phone_call", "text": ""}]}
+  ]
+ },
+ "left_chats": {"about": "left", "list": []}
+}

@@ -1,0 +1,82 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-24h-dmy",
+    "time_precision": "minute",
+    "date_order": "DMY",
+    "date_order_evidence": "step 3: first field exceeded 12 in 3 headers",
+    "lines_read": 9,
+    "messages": 3,
+    "system_lines": 0,
+    "skipped": {
+      "orphan_line": 1
+    },
+    "skipped_samples": [
+      {
+        "line": 1,
+        "reason": "orphan_line"
+      }
+    ],
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 2
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2023-12-31T21:41:00Z",
+    "last_at": "2024-01-13T10:00:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start",
+      "1 lines look like message headers but have an impossible date or time (or a year outside 2000–2100); they were kept as text of the preceding message. If this number is large, the date order may be wrong: confirm it explicitly"
+    ]
+  },
+  "messages": [
+    {
+      "line": 2,
+      "sent_at": "2023-12-31T21:41:00Z",
+      "local": "2023-12-31T21:41:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Shopping list:\n- milk\n\n- eggs"
+    },
+    {
+      "line": 6,
+      "sent_at": "2023-12-31T21:42:00Z",
+      "local": "2023-12-31T21:42:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "Quote from the old chat:\n99/99/2023, 25:61 - not a real header\ndone"
+    },
+    {
+      "line": 9,
+      "sent_at": "2024-01-13T10:00:00Z",
+      "local": "2024-01-13T10:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "ok"
+    }
+  ],
+  "diagnostics": [
+    {
+      "Severity": "warning",
+      "Code": "orphan_line",
+      "Line": 1,
+      "Detail": "line before the first message header"
+    },
+    {
+      "Severity": "info",
+      "Code": "suspicious_header",
+      "Line": 7,
+      "Detail": "header-like line treated as message text"
+    }
+  ]
+}

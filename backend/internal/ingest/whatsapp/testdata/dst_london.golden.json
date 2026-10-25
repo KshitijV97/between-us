@@ -1,0 +1,120 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-24h-dmy",
+    "time_precision": "minute",
+    "date_order": "DMY",
+    "date_order_evidence": "step 3: first field exceeded 12 in 7 headers",
+    "lines_read": 7,
+    "messages": 7,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 4
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 3
+      }
+    ],
+    "first_at": "2024-03-31T00:59:00Z",
+    "last_at": "2024-10-27T02:05:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2024-03-31T00:59:00Z",
+      "local": "2024-03-31T00:59:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "before the clocks change"
+    },
+    {
+      "line": 2,
+      "sent_at": "2024-03-31T01:30:00Z",
+      "local": "2024-03-31T01:30:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "this time does not exist"
+    },
+    {
+      "line": 3,
+      "sent_at": "2024-03-31T01:10:00Z",
+      "local": "2024-03-31T02:10:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "after"
+    },
+    {
+      "line": 4,
+      "sent_at": "2024-10-27T00:20:00Z",
+      "local": "2024-10-27T01:20:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "first 01:20"
+    },
+    {
+      "line": 5,
+      "sent_at": "2024-10-27T00:40:00Z",
+      "local": "2024-10-27T01:40:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "still first pass"
+    },
+    {
+      "line": 6,
+      "sent_at": "2024-10-27T01:10:00Z",
+      "local": "2024-10-27T01:10:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "second pass, earlier clock"
+    },
+    {
+      "line": 7,
+      "sent_at": "2024-10-27T02:05:00Z",
+      "local": "2024-10-27T02:05:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "done"
+    }
+  ],
+  "diagnostics": [
+    {
+      "Severity": "info",
+      "Code": "dst_gap_adjusted",
+      "Line": 2,
+      "Detail": "time falls in a daylight-saving gap; shifted forward"
+    },
+    {
+      "Severity": "info",
+      "Code": "dst_overlap_resolved",
+      "Line": 4,
+      "Detail": "time occurs twice at a daylight-saving change"
+    },
+    {
+      "Severity": "info",
+      "Code": "dst_overlap_resolved",
+      "Line": 5,
+      "Detail": "time occurs twice at a daylight-saving change"
+    },
+    {
+      "Severity": "info",
+      "Code": "dst_overlap_resolved",
+      "Line": 6,
+      "Detail": "time occurs twice at a daylight-saving change"
+    }
+  ]
+}

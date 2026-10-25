@@ -1,0 +1,13 @@
+{
+  "error": "telegram: full account export contains 2 personal chats; choose one with SelectedChatID",
+  "report": {
+    "platform": "telegram",
+    "variant": "telegram-json-account",
+    "time_precision": "second",
+    "lines_read": 0,
+    "messages": 0,
+    "system_lines": 0,
+    "participants": null
+  },
+  "messages": []
+}

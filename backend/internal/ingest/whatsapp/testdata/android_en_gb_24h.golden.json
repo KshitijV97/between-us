@@ -1,0 +1,72 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-24h-dmy",
+    "time_precision": "minute",
+    "date_order": "DMY",
+    "date_order_evidence": "step 3: first field exceeded 12 in 4 headers",
+    "lines_read": 5,
+    "messages": 4,
+    "system_lines": 1,
+    "participants": [
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 2
+      },
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 2
+      }
+    ],
+    "first_at": "2023-12-31T21:40:00Z",
+    "last_at": "2024-01-13T09:30:00Z"
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2023-12-31T21:40:00Z",
+      "local": "2023-12-31T21:40:00",
+      "kind": "system",
+      "system_type": "encryption_notice",
+      "text": "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more."
+    },
+    {
+      "line": 2,
+      "sent_at": "2023-12-31T21:41:00Z",
+      "local": "2023-12-31T21:41:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "Happy new year!"
+    },
+    {
+      "line": 3,
+      "sent_at": "2023-12-31T21:42:00Z",
+      "local": "2023-12-31T21:42:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "You too!"
+    },
+    {
+      "line": 4,
+      "sent_at": "2024-01-01T00:01:00Z",
+      "local": "2024-01-01T00:01:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "It's 2024 🥳"
+    },
+    {
+      "line": 5,
+      "sent_at": "2024-01-13T09:30:00Z",
+      "local": "2024-01-13T09:30:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Coffee on Saturday?"
+    }
+  ]
+}

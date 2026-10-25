@@ -1,0 +1,13 @@
+{
+  "error": "telegram: chat type \"private_supergroup\" is not a one-to-one chat; only personal_chat exports can be analysed",
+  "report": {
+    "platform": "telegram",
+    "variant": "telegram-json-single",
+    "time_precision": "second",
+    "lines_read": 0,
+    "messages": 0,
+    "system_lines": 0,
+    "participants": null
+  },
+  "messages": []
+}

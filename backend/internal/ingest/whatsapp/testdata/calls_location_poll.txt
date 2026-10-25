@@ -1,0 +1,11 @@
+31/12/2023, 21:41 - Alice: Missed voice call
+31/12/2023, 21:42 - Bob: Video call, 12 min
+31/12/2023, 21:43 - Alice: Voice call, 1 hr 5 min
+31/12/2023, 21:44 - Bob: location: https://maps.google.com/?q=51.5,-0.12
+31/12/2023, 21:45 - Alice: Live location shared
+31/12/2023, 21:46 - Bob: POLL:
+Dinner where?
+OPTION: Thai (1 vote)
+OPTION: Pizza (0 votes)
+31/12/2023, 21:47 - Alice: null
+13/01/2024, 10:00 - Bob: Waiting for this message. This may take a while.

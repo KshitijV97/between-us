@@ -695,7 +695,8 @@ fingerprint = sha256(
 ```
 
 - `ts_key` for **WhatsApp** is the naive local timestamp exactly as written, **truncated to the minute** (Android exports have minute precision, iOS seconds), so re-exports from different devices or with a different chosen timezone still match.
-- `ts_key` for **Telegram** is `date_unixtime`; `platform_msg_id` is also unique per chat and used as the primary match when present.
+- **Telegram** (as implemented in `ingest.FingerprintKey`): message IDs are stable per chat, so the key is the `platform_msg_id` alone and edits between exports never duplicate.
+- **Known limitation:** a WhatsApp message whose text was edited between two exports cannot be matched (exports carry no IDs) and is imported again.
 - `dup_ordinal` keeps legitimately repeated messages ("ok", "ok") within the same minute.
 - Insert uses `ON CONFLICT (chat_id, fingerprint) DO NOTHING` (Postgres) / `INSERT OR IGNORE` (SQLite).
 
@@ -725,9 +726,10 @@ Estimates for planning; validate with real fixtures in MVP.
 
 | Item | Postgres (all-in incl. indexes) | SQLite |
 |---|---|---|
-| One message (avg 40 chars body, tsvector, 4 indexes) | ~400 B | ~250 B (incl. FTS5) |
-| 100k messages | ~40 MB | ~25 MB |
-| 500k messages (default tenant quota) | ~200 MB | ~125 MB |
+| One message (avg 40 chars body, tsvector, 4 indexes) | ~400 B (estimate) | **~640 B measured** in M1 (incl. FTS5 and UUIDs stored as 36-char text) |
+| 100k messages | ~40 MB | ~65 MB measured |
+| 500k messages (default tenant quota) | ~200 MB | ~320 MB |
+| 1M messages | ~400 MB | 636 MB measured |
 | Daily rollups, 10-year chat, 2 participants | ~4 MB | ~3 MB |
 | Sessions, 10-year chat | ~2 MB | ~1 MB |
 | Chunks: 1 per ~20 messages, `halfvec(384)` + HNSW | ~2 KB/chunk → 500k msgs ≈ 50 MB | float32 BLOB ≈ 1.6 KB/chunk ≈ 40 MB |

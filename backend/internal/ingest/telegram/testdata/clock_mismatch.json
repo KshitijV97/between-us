@@ -1,0 +1,8 @@
+{
+ "name": "Bob", "type": "personal_chat", "id": 4242424242,
+ "messages": [
+  {"id": 100, "type": "message", "date": "2024-01-10T15:30:00", "date_unixtime": "1704880800", "from": "Alice", "from_id": "user1111111111", "text": "IST machine, +05:30"},
+  {"id": 101, "type": "message", "date": "2024-01-10T15:31:00", "date_unixtime": "1704880860", "from": "Bob", "from_id": "user2222222222", "text": "same offset"},
+  {"id": 102, "type": "message", "date": "2024-01-10T15:39:13", "date_unixtime": "1704880920", "from": "Alice", "from_id": "user1111111111", "text": "clock skew of 7m13s"}
+ ]
+}

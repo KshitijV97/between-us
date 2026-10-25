@@ -1,0 +1,67 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-12h-mdy",
+    "time_precision": "minute",
+    "date_order": "MDY",
+    "date_order_evidence": "step 3: second field exceeded 12 in 4 headers",
+    "lines_read": 4,
+    "messages": 4,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "+919876543210",
+        "display": "+91 98765 43210",
+        "message_count": 3
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2023-12-31T16:11:00Z",
+    "last_at": "2024-01-13T04:14:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2023-12-31T16:11:00Z",
+      "local": "2023-12-31T21:41:00",
+      "sender": "+91 98765 43210",
+      "key": "+919876543210",
+      "kind": "text",
+      "text": "hi"
+    },
+    {
+      "line": 2,
+      "sent_at": "2023-12-31T16:12:00Z",
+      "local": "2023-12-31T21:42:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "who is this?"
+    },
+    {
+      "line": 3,
+      "sent_at": "2023-12-31T16:13:00Z",
+      "local": "2023-12-31T21:43:00",
+      "sender": "+91 98765 43210",
+      "key": "+919876543210",
+      "kind": "text",
+      "text": "Chandra here"
+    },
+    {
+      "line": 4,
+      "sent_at": "2024-01-13T04:14:00Z",
+      "local": "2024-01-13T09:44:00",
+      "sender": "+91 98765 43210",
+      "key": "+919876543210",
+      "kind": "text",
+      "text": "save my number"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "error": "telegram: invalid or truncated JSON: unexpected EOF",
+  "report": {
+    "platform": "telegram",
+    "variant": "telegram-json-single",
+    "time_precision": "second",
+    "lines_read": 2,
+    "messages": 1,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "user1111111111",
+        "display": "Alice",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2024-01-01T10:00:00Z",
+    "last_at": "2024-01-01T10:00:00Z",
+    "warnings": [
+      "Export times suggest the exporting computer used UTC+00:00; use a timezone with that offset for daily statistics."
+    ],
+    "suggested_title": "Bob"
+  },
+  "diagnostics": [
+    {
+      "Severity": "error",
+      "Code": "bad_message_json",
+      "Line": 2,
+      "Detail": "JSON decoding stopped at byte offset 231"
+    }
+  ],
+  "messages": [
+    {
+      "Platform": "telegram",
+      "ExternalID": "1",
+      "SentAt": "2024-01-01T10:00:00Z",
+      "LocalTime": "2024-01-01T10:00:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "complete",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 1
+    }
+  ]
+}

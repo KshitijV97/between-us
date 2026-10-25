@@ -1,0 +1,11 @@
+{
+ "name": "Bob", "type": "personal_chat", "id": 4242424242,
+ "messages": [
+  {"id": 70, "type": "message", "date": "2024-06-01T10:00:00", "date_unixtime": "1717236000", "from": "Alice", "from_id": "user1111111111", "text": "Passed the exam!",
+   "reactions": [
+    {"type": "emoji", "count": 1, "emoji": "❤", "recent": [{"from": "Bob", "from_id": "user2222222222", "date": "2024-06-01T10:01:00"}]},
+    {"type": "custom_emoji", "count": 2, "document_id": "5368324170671202286"},
+    {"type": "paid", "count": 3}
+   ]}
+ ]
+}

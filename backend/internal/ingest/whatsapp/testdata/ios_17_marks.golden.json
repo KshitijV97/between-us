@@ -1,0 +1,101 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "ios-12h-mdy",
+    "time_precision": "second",
+    "date_order": "MDY",
+    "date_order_evidence": "step 3: second field exceeded 12 in 7 headers",
+    "lines_read": 7,
+    "messages": 7,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 4
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 3
+      }
+    ],
+    "first_at": "2024-01-01T03:41:05Z",
+    "last_at": "2024-01-13T16:00:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2024-01-01T03:41:05Z",
+      "local": "2023-12-31T21:41:05",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "media",
+      "media_type": "image",
+      "omitted": true
+    },
+    {
+      "line": 2,
+      "sent_at": "2024-01-01T03:41:10Z",
+      "local": "2023-12-31T21:41:10",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "media",
+      "media_type": "sticker",
+      "omitted": true
+    },
+    {
+      "line": 3,
+      "sent_at": "2024-01-01T03:41:20Z",
+      "local": "2023-12-31T21:41:20",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "media",
+      "media_type": "gif",
+      "omitted": true
+    },
+    {
+      "line": 4,
+      "sent_at": "2024-01-01T03:42:00Z",
+      "local": "2023-12-31T21:42:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "media",
+      "media_type": "document",
+      "file_name": "Report.pdf",
+      "omitted": true
+    },
+    {
+      "line": 5,
+      "sent_at": "2024-01-01T03:43:00Z",
+      "local": "2023-12-31T21:43:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "media",
+      "media_type": "contact",
+      "omitted": true
+    },
+    {
+      "line": 6,
+      "sent_at": "2024-01-01T03:44:00Z",
+      "local": "2023-12-31T21:44:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "media",
+      "media_type": "audio",
+      "omitted": true
+    },
+    {
+      "line": 7,
+      "sent_at": "2024-01-13T16:00:00Z",
+      "local": "2024-01-13T10:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "All good"
+    }
+  ]
+}

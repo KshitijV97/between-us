@@ -16,7 +16,6 @@ func TestRunCommands(t *testing.T) {
 		{nil, exitUsage, "Usage:"},
 		{[]string{"help"}, exitOK, "Commands:"},
 		{[]string{"version"}, exitOK, "chatanalyzer "},
-		{[]string{"migrate"}, exitNotReady, "not implemented yet"},
 		{[]string{"bogus"}, exitUsage, `unknown command "bogus"`},
 		{[]string{"version", "-nope"}, exitUsage, "flag provided but not defined"},
 	}
@@ -43,5 +42,17 @@ func TestVersionJSON(t *testing.T) {
 	}
 	if v["version"] == "" || v["go_version"] == "" {
 		t.Errorf("fields missing: %v", v)
+	}
+}
+
+func TestTitleFromFileName(t *testing.T) {
+	for in, want := range map[string]string{
+		"WhatsApp Chat with Bob.zip": "Bob",
+		"WhatsApp Chat - Bob.zip":    "Bob",
+		"export.zip":                 "",
+	} {
+		if got := titleFromFileName(in); got != want {
+			t.Errorf("titleFromFileName(%q) = %q, want %q", in, got, want)
+		}
 	}
 }

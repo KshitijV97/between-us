@@ -1,0 +1,96 @@
+{
+  "report": {
+    "platform": "telegram",
+    "variant": "telegram-json-single",
+    "time_precision": "second",
+    "lines_read": 3,
+    "messages": 3,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "user1111111111",
+        "display": "Alice",
+        "message_count": 2
+      },
+      {
+        "key": "user2222222222",
+        "display": "Bob",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2024-01-05T21:41:05Z",
+    "last_at": "2024-01-06T08:00:00Z",
+    "warnings": [
+      "Export times suggest the exporting computer used UTC+00:00; use a timezone with that offset for daily statistics."
+    ],
+    "suggested_title": "Bob"
+  },
+  "messages": [
+    {
+      "Platform": "telegram",
+      "ExternalID": "1",
+      "SentAt": "2024-01-05T21:41:05Z",
+      "LocalTime": "2024-01-05T21:41:05Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "Happy new year!",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 1
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "2",
+      "SentAt": "2024-01-05T21:42:10Z",
+      "LocalTime": "2024-01-05T21:42:10Z",
+      "TimePrecision": "second",
+      "SenderKey": "user2222222222",
+      "SenderDisplay": "Bob",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "You too\nsee you tomorrow",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 2
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "3",
+      "SentAt": "2024-01-06T08:00:00Z",
+      "LocalTime": "2024-01-06T08:00:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "Morning ☀️",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 3
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-12h-mdy",
+    "time_precision": "minute",
+    "date_order": "MDY",
+    "date_order_evidence": "step 3: second field exceeded 12 in 9 headers",
+    "lines_read": 9,
+    "messages": 1,
+    "system_lines": 8,
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2024-01-01T02:40:00Z",
+    "last_at": "2024-01-13T14:48:00Z"
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2024-01-01T02:40:00Z",
+      "local": "2023-12-31T21:40:00",
+      "kind": "system",
+      "system_type": "encryption_notice",
+      "text": "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more."
+    },
+    {
+      "line": 2,
+      "sent_at": "2024-01-01T02:41:00Z",
+      "local": "2023-12-31T21:41:00",
+      "kind": "system",
+      "system_type": "number_changed",
+      "text": "Bob changed their phone number to a new number. Tap to message or add the new number."
+    },
+    {
+      "line": 3,
+      "sent_at": "2024-01-01T02:42:00Z",
+      "local": "2023-12-31T21:42:00",
+      "kind": "system",
+      "system_type": "disappearing_toggle",
+      "text": "Disappearing messages were turned on. New messages will disappear from this chat 7 days after they're sent."
+    },
+    {
+      "line": 4,
+      "sent_at": "2024-01-01T02:43:00Z",
+      "local": "2023-12-31T21:43:00",
+      "kind": "system",
+      "system_type": "block_toggle",
+      "text": "You blocked this contact. Tap to unblock."
+    },
+    {
+      "line": 5,
+      "sent_at": "2024-01-01T02:44:00Z",
+      "local": "2023-12-31T21:44:00",
+      "kind": "system",
+      "system_type": "security_code_changed",
+      "text": "Your security code with Bob changed. Tap to learn more."
+    },
+    {
+      "line": 6,
+      "sent_at": "2024-01-01T02:45:00Z",
+      "local": "2023-12-31T21:45:00",
+      "kind": "system",
+      "system_type": "contact_info",
+      "text": "Bob is a contact."
+    },
+    {
+      "line": 7,
+      "sent_at": "2024-01-01T02:46:00Z",
+      "local": "2023-12-31T21:46:00",
+      "kind": "system",
+      "system_type": "call_missed",
+      "text": "Missed voice call"
+    },
+    {
+      "line": 8,
+      "sent_at": "2024-01-01T02:47:00Z",
+      "local": "2023-12-31T21:47:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "hello"
+    },
+    {
+      "line": 9,
+      "sent_at": "2024-01-13T14:48:00Z",
+      "local": "2024-01-13T09:48:00",
+      "kind": "system",
+      "system_type": "system_other",
+      "text": "Something new happened"
+    }
+  ]
+}

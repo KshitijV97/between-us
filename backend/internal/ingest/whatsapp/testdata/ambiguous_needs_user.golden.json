@@ -1,0 +1,60 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-12h-mdy",
+    "time_precision": "minute",
+    "date_order": "MDY",
+    "date_order_evidence": "step 6: dates are ambiguous; order guessed from the clock style, please confirm",
+    "date_order_ambiguous": true,
+    "lines_read": 3,
+    "messages": 3,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 2
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2024-03-04T14:00:00Z",
+    "last_at": "2024-03-04T23:30:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start",
+      "the date order could not be determined with certainty; please confirm it"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2024-03-04T14:00:00Z",
+      "local": "2024-03-04T09:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Morning"
+    },
+    {
+      "line": 2,
+      "sent_at": "2024-03-04T14:05:00Z",
+      "local": "2024-03-04T09:05:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "Morning!"
+    },
+    {
+      "line": 3,
+      "sent_at": "2024-03-04T23:30:00Z",
+      "local": "2024-03-04T18:30:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Dinner?"
+    }
+  ]
+}

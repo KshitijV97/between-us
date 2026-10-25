@@ -1,0 +1,10 @@
+{
+ "name": "Bob", "type": "personal_chat", "id": 4242424242,
+ "messages": [
+  {"id": 90, "type": "message", "date": "2024-07-01T10:00:00", "date_unixtime": "1719828000", "from": "Alice", "from_id": "user1111111111", "poll": {"question": "Beach or hills?", "closed": false, "total_voters": 2, "answers": [{"text": "Beach", "voters": 1, "chosen": true}, {"text": "Hills", "voters": 1, "chosen": false}]}, "text": ""},
+  {"id": 91, "type": "message", "date": "2024-07-01T10:01:00", "date_unixtime": "1719828060", "from": "Bob", "from_id": "user2222222222", "location_information": {"latitude": 12.97, "longitude": 77.59}, "place_name": "Cafe Example", "address": "1 Example Road", "text": ""},
+  {"id": 92, "type": "message", "date": "2024-07-01T10:02:00", "date_unixtime": "1719828120", "from": "Bob", "from_id": "user2222222222", "location_information": {"latitude": 12.97, "longitude": 77.59}, "live_location_period_seconds": 900, "text": ""},
+  {"id": 93, "type": "message", "date": "2024-07-01T10:03:00", "date_unixtime": "1719828180", "from": "Alice", "from_id": "user1111111111", "contact_information": {"first_name": "Carol", "last_name": "Example", "phone_number": "+15550000000"}, "contact_vcard": "contacts/contact_1.vcard", "text": ""},
+  {"id": 94, "type": "message", "date": "2024-07-01T10:04:00", "date_unixtime": "1719828240", "from": "Alice", "from_id": "user1111111111", "text": ""}
+ ]
+}

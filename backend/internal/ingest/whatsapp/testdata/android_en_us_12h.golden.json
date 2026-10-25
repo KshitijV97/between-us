@@ -1,0 +1,81 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-12h-mdy",
+    "time_precision": "minute",
+    "date_order": "MDY",
+    "date_order_evidence": "step 3: second field exceeded 12 in 5 headers",
+    "lines_read": 6,
+    "messages": 5,
+    "system_lines": 1,
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 3
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 2
+      }
+    ],
+    "first_at": "2023-12-31T02:40:00Z",
+    "last_at": "2024-01-02T13:15:00Z"
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2023-12-31T02:40:00Z",
+      "local": "2023-12-30T21:40:00",
+      "kind": "system",
+      "system_type": "encryption_notice",
+      "text": "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more."
+    },
+    {
+      "line": 2,
+      "sent_at": "2023-12-31T02:41:00Z",
+      "local": "2023-12-30T21:41:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Happy almost new year!"
+    },
+    {
+      "line": 3,
+      "sent_at": "2023-12-31T02:43:00Z",
+      "local": "2023-12-30T21:43:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "You too 🎉"
+    },
+    {
+      "line": 4,
+      "sent_at": "2023-12-31T05:05:00Z",
+      "local": "2023-12-31T00:05:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Midnight snack?"
+    },
+    {
+      "line": 5,
+      "sent_at": "2023-12-31T17:30:00Z",
+      "local": "2023-12-31T12:30:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "Lunch at half past twelve"
+    },
+    {
+      "line": 6,
+      "sent_at": "2024-01-02T13:15:00Z",
+      "local": "2024-01-02T08:15:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Back to work"
+    }
+  ]
+}

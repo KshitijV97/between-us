@@ -1,0 +1,60 @@
+{
+  "report": {
+    "platform": "telegram",
+    "variant": "telegram-json-single",
+    "time_precision": "second",
+    "lines_read": 1,
+    "messages": 1,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "user1111111111",
+        "display": "Alice",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2024-06-01T10:00:00Z",
+    "last_at": "2024-06-01T10:00:00Z",
+    "warnings": [
+      "Export times suggest the exporting computer used UTC+00:00; use a timezone with that offset for daily statistics."
+    ],
+    "suggested_title": "Bob"
+  },
+  "messages": [
+    {
+      "Platform": "telegram",
+      "ExternalID": "70",
+      "SentAt": "2024-06-01T10:00:00Z",
+      "LocalTime": "2024-06-01T10:00:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "Passed the exam!",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": [
+        {
+          "Emoji": "❤",
+          "Count": 1
+        },
+        {
+          "Emoji": "custom_emoji:5368324170671202286",
+          "Count": 2
+        },
+        {
+          "Emoji": "paid",
+          "Count": 3
+        }
+      ],
+      "SourceLine": 1
+    }
+  ]
+}

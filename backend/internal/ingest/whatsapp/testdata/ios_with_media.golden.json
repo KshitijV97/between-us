@@ -1,0 +1,81 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "ios-24h-dmy",
+    "time_precision": "second",
+    "date_order": "DMY",
+    "date_order_evidence": "step 3: first field exceeded 12 in 5 headers",
+    "lines_read": 5,
+    "messages": 5,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 3
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 2
+      }
+    ],
+    "first_at": "2023-12-31T21:41:05Z",
+    "last_at": "2024-01-13T09:00:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2023-12-31T21:41:05Z",
+      "local": "2023-12-31T21:41:05",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "media",
+      "media_type": "image",
+      "file_name": "00000012-PHOTO-2023-12-31-21-41-05.jpg"
+    },
+    {
+      "line": 2,
+      "sent_at": "2023-12-31T21:42:00Z",
+      "local": "2023-12-31T21:42:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "media",
+      "media_type": "voice_note",
+      "file_name": "00000013-AUDIO-2023-12-31-21-42-00.opus"
+    },
+    {
+      "line": 3,
+      "sent_at": "2023-12-31T21:43:00Z",
+      "local": "2023-12-31T21:43:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "media",
+      "media_type": "video",
+      "file_name": "00000014-VIDEO-2023-12-31-21-43-00.mp4"
+    },
+    {
+      "line": 4,
+      "sent_at": "2023-12-31T21:44:00Z",
+      "local": "2023-12-31T21:44:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "media",
+      "media_type": "sticker",
+      "file_name": "00000015-STICKER-2023-12-31-21-44-00.webp"
+    },
+    {
+      "line": 5,
+      "sent_at": "2024-01-13T09:00:00Z",
+      "local": "2024-01-13T09:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "media",
+      "media_type": "gif",
+      "file_name": "00000016-GIF-2024-01-13-09-00-00.mp4"
+    }
+  ]
+}

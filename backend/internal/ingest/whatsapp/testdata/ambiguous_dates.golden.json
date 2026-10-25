@@ -1,0 +1,355 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-24h-dmy",
+    "time_precision": "minute",
+    "date_order": "DMY",
+    "date_order_evidence": "step 4: order violations DMY=0 MDY=2",
+    "lines_read": 36,
+    "messages": 36,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 18
+      },
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 18
+      }
+    ],
+    "first_at": "2024-01-01T14:30:00Z",
+    "last_at": "2024-03-12T14:30:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2024-01-01T14:30:00Z",
+      "local": "2024-01-01T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 2,
+      "sent_at": "2024-01-02T14:30:00Z",
+      "local": "2024-01-02T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 3,
+      "sent_at": "2024-01-03T14:30:00Z",
+      "local": "2024-01-03T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 4,
+      "sent_at": "2024-01-04T14:30:00Z",
+      "local": "2024-01-04T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 5,
+      "sent_at": "2024-01-05T14:30:00Z",
+      "local": "2024-01-05T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 6,
+      "sent_at": "2024-01-06T14:30:00Z",
+      "local": "2024-01-06T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 7,
+      "sent_at": "2024-01-07T14:30:00Z",
+      "local": "2024-01-07T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 8,
+      "sent_at": "2024-01-08T14:30:00Z",
+      "local": "2024-01-08T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 9,
+      "sent_at": "2024-01-09T14:30:00Z",
+      "local": "2024-01-09T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 10,
+      "sent_at": "2024-01-10T14:30:00Z",
+      "local": "2024-01-10T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 11,
+      "sent_at": "2024-01-11T14:30:00Z",
+      "local": "2024-01-11T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 12,
+      "sent_at": "2024-01-12T14:30:00Z",
+      "local": "2024-01-12T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 13,
+      "sent_at": "2024-02-01T14:30:00Z",
+      "local": "2024-02-01T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 14,
+      "sent_at": "2024-02-02T14:30:00Z",
+      "local": "2024-02-02T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 15,
+      "sent_at": "2024-02-03T14:30:00Z",
+      "local": "2024-02-03T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 16,
+      "sent_at": "2024-02-04T14:30:00Z",
+      "local": "2024-02-04T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 17,
+      "sent_at": "2024-02-05T14:30:00Z",
+      "local": "2024-02-05T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 18,
+      "sent_at": "2024-02-06T14:30:00Z",
+      "local": "2024-02-06T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 19,
+      "sent_at": "2024-02-07T14:30:00Z",
+      "local": "2024-02-07T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 20,
+      "sent_at": "2024-02-08T14:30:00Z",
+      "local": "2024-02-08T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 21,
+      "sent_at": "2024-02-09T14:30:00Z",
+      "local": "2024-02-09T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 22,
+      "sent_at": "2024-02-10T14:30:00Z",
+      "local": "2024-02-10T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 23,
+      "sent_at": "2024-02-11T14:30:00Z",
+      "local": "2024-02-11T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 24,
+      "sent_at": "2024-02-12T14:30:00Z",
+      "local": "2024-02-12T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 25,
+      "sent_at": "2024-03-01T14:30:00Z",
+      "local": "2024-03-01T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 26,
+      "sent_at": "2024-03-02T14:30:00Z",
+      "local": "2024-03-02T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 27,
+      "sent_at": "2024-03-03T14:30:00Z",
+      "local": "2024-03-03T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 28,
+      "sent_at": "2024-03-04T14:30:00Z",
+      "local": "2024-03-04T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 29,
+      "sent_at": "2024-03-05T14:30:00Z",
+      "local": "2024-03-05T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 30,
+      "sent_at": "2024-03-06T14:30:00Z",
+      "local": "2024-03-06T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 31,
+      "sent_at": "2024-03-07T14:30:00Z",
+      "local": "2024-03-07T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 32,
+      "sent_at": "2024-03-08T14:30:00Z",
+      "local": "2024-03-08T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 33,
+      "sent_at": "2024-03-09T14:30:00Z",
+      "local": "2024-03-09T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 34,
+      "sent_at": "2024-03-10T14:30:00Z",
+      "local": "2024-03-10T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    },
+    {
+      "line": 35,
+      "sent_at": "2024-03-11T14:30:00Z",
+      "local": "2024-03-11T20:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "sab badhiya"
+    },
+    {
+      "line": 36,
+      "sent_at": "2024-03-12T14:30:00Z",
+      "local": "2024-03-12T20:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "kya haal hai"
+    }
+  ]
+}

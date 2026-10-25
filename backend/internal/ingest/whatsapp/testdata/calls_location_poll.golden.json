@@ -1,0 +1,119 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-24h-dmy",
+    "time_precision": "minute",
+    "date_order": "DMY",
+    "date_order_evidence": "step 3: first field exceeded 12 in 8 headers",
+    "lines_read": 11,
+    "messages": 7,
+    "system_lines": 1,
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 4
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 4
+      }
+    ],
+    "first_at": "2023-12-31T21:41:00Z",
+    "last_at": "2024-01-13T10:00:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2023-12-31T21:41:00Z",
+      "local": "2023-12-31T21:41:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "call",
+      "system_type": "phone_call",
+      "call": {
+        "Video": false,
+        "Missed": true,
+        "DurationSec": 0
+      }
+    },
+    {
+      "line": 2,
+      "sent_at": "2023-12-31T21:42:00Z",
+      "local": "2023-12-31T21:42:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "call",
+      "system_type": "phone_call",
+      "call": {
+        "Video": true,
+        "Missed": false,
+        "DurationSec": 720
+      }
+    },
+    {
+      "line": 3,
+      "sent_at": "2023-12-31T21:43:00Z",
+      "local": "2023-12-31T21:43:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "call",
+      "system_type": "phone_call",
+      "call": {
+        "Video": false,
+        "Missed": false,
+        "DurationSec": 3900
+      }
+    },
+    {
+      "line": 4,
+      "sent_at": "2023-12-31T21:44:00Z",
+      "local": "2023-12-31T21:44:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "location"
+    },
+    {
+      "line": 5,
+      "sent_at": "2023-12-31T21:45:00Z",
+      "local": "2023-12-31T21:45:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "location",
+      "system_type": "live_location"
+    },
+    {
+      "line": 6,
+      "sent_at": "2023-12-31T21:46:00Z",
+      "local": "2023-12-31T21:46:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "poll",
+      "text": "Dinner where?"
+    },
+    {
+      "line": 10,
+      "sent_at": "2023-12-31T21:47:00Z",
+      "local": "2023-12-31T21:47:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "media",
+      "system_type": "view_once",
+      "media_type": "unknown",
+      "omitted": true
+    },
+    {
+      "line": 11,
+      "sent_at": "2024-01-13T10:00:00Z",
+      "local": "2024-01-13T10:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "system",
+      "system_type": "undecryptable"
+    }
+  ]
+}

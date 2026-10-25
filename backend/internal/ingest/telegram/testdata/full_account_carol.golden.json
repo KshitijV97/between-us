@@ -1,0 +1,100 @@
+{
+  "report": {
+    "platform": "telegram",
+    "variant": "telegram-json-account",
+    "time_precision": "second",
+    "lines_read": 3,
+    "messages": 3,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "user3333333333",
+        "display": "Carol",
+        "message_count": 2
+      },
+      {
+        "key": "user1111111111",
+        "display": "Alice",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2024-02-01T10:00:00Z",
+    "last_at": "2024-02-01T10:00:00Z",
+    "warnings": [
+      "Export times suggest the exporting computer used UTC+00:00; use a timezone with that offset for daily statistics."
+    ],
+    "suggested_title": "Carol"
+  },
+  "messages": [
+    {
+      "Platform": "telegram",
+      "ExternalID": "1",
+      "SentAt": "2024-02-01T10:00:00Z",
+      "LocalTime": "2024-02-01T10:00:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user3333333333",
+      "SenderDisplay": "Carol",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "CAROL SECRET",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 1
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "2",
+      "SentAt": "2024-02-01T10:00:00Z",
+      "LocalTime": "2024-02-01T10:00:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user1111111111",
+      "SenderDisplay": "Alice",
+      "Kind": "text",
+      "SystemType": "",
+      "Text": "CAROL SECRET 2",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": null,
+      "Reactions": null,
+      "SourceLine": 2
+    },
+    {
+      "Platform": "telegram",
+      "ExternalID": "3",
+      "SentAt": "2024-02-01T10:00:00Z",
+      "LocalTime": "2024-02-01T10:00:00Z",
+      "TimePrecision": "second",
+      "SenderKey": "user3333333333",
+      "SenderDisplay": "Carol",
+      "Kind": "call",
+      "SystemType": "phone_call",
+      "Text": "",
+      "MediaType": "",
+      "Media": null,
+      "ReplyToExternalID": "",
+      "Forwarded": false,
+      "Edited": false,
+      "EditedAt": null,
+      "Deleted": false,
+      "Call": {
+        "Video": false,
+        "Missed": false,
+        "DurationSec": 0
+      },
+      "Reactions": null,
+      "SourceLine": 3
+    }
+  ]
+}

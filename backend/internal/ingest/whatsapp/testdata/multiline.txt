@@ -1,0 +1,9 @@
+stray text before the first header
+31/12/2023, 21:41 - Alice: Shopping list:
+- milk
+
+- eggs
+31/12/2023, 21:42 - Bob: Quote from the old chat:
+99/99/2023, 25:61 - not a real header
+done
+13/01/2024, 10:00 - Alice: ok

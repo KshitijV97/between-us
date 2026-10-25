@@ -1,0 +1,16 @@
+{
+ "name": "Bob", "type": "personal_chat", "id": 4242424242,
+ "messages": [
+  {"id": 30, "type": "message", "date": "2024-04-01T12:00:00", "date_unixtime": "1711972800", "from": "Alice", "from_id": "user1111111111", "photo": "photos/photo_1@01-04-2024_12-00-00.jpg", "photo_file_size": 123456, "width": 800, "height": 600, "text": "our view"},
+  {"id": 31, "type": "message", "date": "2024-04-01T12:01:00", "date_unixtime": "1711972860", "from": "Bob", "from_id": "user2222222222", "photo": "(File not included. Change data exporting settings to download.)", "text": ""},
+  {"id": 32, "type": "message", "date": "2024-04-01T12:02:00", "date_unixtime": "1711972920", "from": "Bob", "from_id": "user2222222222", "file": "(File not included. Change data exporting settings to download.)", "media_type": "voice_message", "mime_type": "audio/ogg", "duration_seconds": 14, "text": ""},
+  {"id": 33, "type": "message", "date": "2024-04-01T12:03:00", "date_unixtime": "1711972980", "from": "Alice", "from_id": "user1111111111", "file": "round_video_messages/file_1.mp4", "media_type": "video_message", "mime_type": "video/mp4", "duration_seconds": 9, "text": ""},
+  {"id": 34, "type": "message", "date": "2024-04-01T12:04:00", "date_unixtime": "1711973040", "from": "Alice", "from_id": "user1111111111", "file": "video_files/clip.mp4", "file_name": "clip.mp4", "file_size": 999999, "media_type": "video_file", "mime_type": "video/mp4", "duration_seconds": 61, "text": "watch"},
+  {"id": 35, "type": "message", "date": "2024-04-01T12:05:00", "date_unixtime": "1711973100", "from": "Bob", "from_id": "user2222222222", "file": "stickers/sticker.webp", "media_type": "sticker", "sticker_emoji": "😂", "mime_type": "image/webp", "text": ""},
+  {"id": 36, "type": "message", "date": "2024-04-01T12:06:00", "date_unixtime": "1711973160", "from": "Bob", "from_id": "user2222222222", "file": "video_files/funny.gif.mp4", "media_type": "animation", "mime_type": "video/mp4", "text": ""},
+  {"id": 37, "type": "message", "date": "2024-04-01T12:07:00", "date_unixtime": "1711973220", "from": "Alice", "from_id": "user1111111111", "file": "files/song.mp3", "file_name": "song.mp3", "media_type": "audio_file", "mime_type": "audio/mpeg", "duration_seconds": 200, "text": ""},
+  {"id": 38, "type": "message", "date": "2024-04-01T12:08:00", "date_unixtime": "1711973280", "from": "Alice", "from_id": "user1111111111", "file": "files/plan.pdf", "file_name": "plan.pdf", "mime_type": "application/pdf", "text": "the plan"},
+  {"id": 39, "type": "message", "date": "2024-04-01T12:09:00", "date_unixtime": "1711973340", "from": "Bob", "from_id": "user2222222222", "file": "(File exceeds maximum size. Change data exporting settings to download.)", "media_type": "hologram_message", "text": ""},
+  {"id": 40, "type": "message", "date": "2024-04-01T12:10:00", "date_unixtime": "1711973400", "from": "Bob", "from_id": "user2222222222", "photo": "(File not included. Change data exporting settings to download.)", "self_destruct_period_seconds": 10, "text": ""}
+ ]
+}

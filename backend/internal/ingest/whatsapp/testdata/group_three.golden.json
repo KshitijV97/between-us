@@ -1,0 +1,80 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-24h-dmy",
+    "time_precision": "minute",
+    "date_order": "DMY",
+    "date_order_evidence": "step 3: first field exceeded 12 in 5 headers",
+    "lines_read": 5,
+    "messages": 4,
+    "system_lines": 1,
+    "participants": [
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 2
+      },
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 1
+      },
+      {
+        "key": "Chandra",
+        "display": "Chandra",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2023-12-31T21:40:00Z",
+    "last_at": "2024-01-13T10:00:00Z",
+    "warnings": [
+      "3 senders detected; choose the two participants to analyse (FR-ING-012)"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2023-12-31T21:40:00Z",
+      "local": "2023-12-31T21:40:00",
+      "kind": "system",
+      "system_type": "group_created",
+      "text": "Alice created group \"Trip\""
+    },
+    {
+      "line": 2,
+      "sent_at": "2023-12-31T21:41:00Z",
+      "local": "2023-12-31T21:41:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Hi all"
+    },
+    {
+      "line": 3,
+      "sent_at": "2023-12-31T21:42:00Z",
+      "local": "2023-12-31T21:42:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "Hey"
+    },
+    {
+      "line": 4,
+      "sent_at": "2023-12-31T21:43:00Z",
+      "local": "2023-12-31T21:43:00",
+      "sender": "Chandra",
+      "key": "Chandra",
+      "kind": "text",
+      "text": "Namaste"
+    },
+    {
+      "line": 5,
+      "sent_at": "2024-01-13T10:00:00Z",
+      "local": "2024-01-13T10:00:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "Plan?"
+    }
+  ]
+}

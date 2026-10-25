@@ -352,4 +352,16 @@ Fixtures in `backend/internal/ingest/telegram/testdata/`, synthetic, with `*.exp
 | `incremental_v1.json` / `_v2.json` | Re-import de-duplicates by `external_id`. |
 | `large_300mb` (generated in CI) | Memory ceiling (FR-ING-013) and throughput (NFR-PERF-002). |
 
-Fuzz target `FuzzTelegramDecode` runs nightly alongside the WhatsApp fuzzers.
+Fuzz target `FuzzDecode` (`./internal/ingest/telegram`) runs alongside the WhatsApp fuzzer; M1 ran it for
+10 minutes without a crash.
+
+## 9. Implementation notes (M1)
+
+| Topic | Behaviour |
+|---|---|
+| Truncated JSON | Complete messages before the break reach the sink, then the parser returns an error; the importer rolls the whole import back (no partial imports in M1). |
+| Timezone hint | Emitted as a report warning when `date` and `date_unixtime` disagree by a whole-hour offset. A structured `SuggestedUTCOffset` field is a backlog item. |
+| Group / supergroup | Refused with a typed error; selecting two participants from a Telegram group (FR-ING-012) is a backlog item. |
+| Video calls | The export does not mark them distinctly, so `Call.Video` is always false. |
+| Measured | ~100 MB/s; 300k messages streamed with a 9.2 MiB peak heap. |
+

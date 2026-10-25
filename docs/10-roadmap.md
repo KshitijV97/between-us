@@ -75,6 +75,8 @@ gantt
 | **Requirements** | FR-ING-001 (CLI), FR-ING-002…014, FR-LIB-002 (delete, store side), NFR-PERF-002, NFR-REL-002, NFR-REL-004, NFR-MNT-002, NFR-MNT-003, SEC-003 (upload), MT-001 (schema carries `tenant_id`) |
 | **Exit criteria** | All fixtures in both parser fixture matrices pass; 200 MB synthetic WhatsApp export imports under the memory ceiling; re-import adds zero rows; fuzzers run 10 min with no crash. |
 | **Parallel split** | Agent A: WhatsApp parser + fixtures. Agent B: Telegram parser + fixtures. Agent C: store + migrations + import orchestration. Contract (`ingest.Message`, `Parser`, `Sink`) is written first by the lead and frozen; agents only touch their own packages. |
+| **Status** | **Done 2026-10-24** on branch `feat/m1-ingest`, built exactly as split above (three parallel agents after a contract commit). Measured: 100k-message import in ~5 s (budget 15 s); 192 MB WhatsApp export parsed with 41 MB peak RSS and a 1M-message import at 66 MB (ceiling 150 MB); re-import adds 0 rows, including with a different timezone; both fuzzers ran 10 min clean after fixing two findings. |
+| **Carried forward** | To M2: message-browser cursor as a `(sent_at, ordinal)` pair; SQLite insert throughput (~37k rows/s, 1M messages take ~2 min) and on-disk size (~640 B/message; UUIDs as 16-byte BLOBs would save ~190 B). To M3: structured `SuggestedUTCOffset` in the import report. To M5: `CreateTenant` on the store interface. Backlog: selecting two participants from a Telegram group (FR-ING-012). |
 
 ### M2 — Analytics engine and API
 

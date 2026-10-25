@@ -1,0 +1,58 @@
+{
+  "report": {
+    "platform": "whatsapp",
+    "variant": "android-24h-dmy",
+    "time_precision": "minute",
+    "date_order": "DMY",
+    "date_order_evidence": "step 3: first field exceeded 12 in 3 headers",
+    "lines_read": 4,
+    "messages": 3,
+    "system_lines": 0,
+    "participants": [
+      {
+        "key": "Bob",
+        "display": "Bob",
+        "message_count": 2
+      },
+      {
+        "key": "Alice",
+        "display": "Alice",
+        "message_count": 1
+      }
+    ],
+    "first_at": "2023-12-31T21:41:00Z",
+    "last_at": "2024-01-13T10:00:00Z",
+    "warnings": [
+      "the export does not start with the encryption notice and may be truncated at the start"
+    ]
+  },
+  "messages": [
+    {
+      "line": 1,
+      "sent_at": "2023-12-31T21:41:00Z",
+      "local": "2023-12-31T21:41:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "hi"
+    },
+    {
+      "line": 2,
+      "sent_at": "2023-12-31T21:42:00Z",
+      "local": "2023-12-31T21:42:00",
+      "sender": "Alice",
+      "key": "Alice",
+      "kind": "text",
+      "text": "two\nlines"
+    },
+    {
+      "line": 4,
+      "sent_at": "2024-01-13T10:00:00Z",
+      "local": "2024-01-13T10:00:00",
+      "sender": "Bob",
+      "key": "Bob",
+      "kind": "text",
+      "text": "bye"
+    }
+  ]
+}

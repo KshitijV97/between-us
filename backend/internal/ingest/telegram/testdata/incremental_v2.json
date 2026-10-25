@@ -1,0 +1,8 @@
+{
+ "name": "Bob", "type": "personal_chat", "id": 4242424242,
+ "messages": [
+  {"id": 200, "type": "message", "date": "2024-08-01T10:00:00", "date_unixtime": "1722506400", "from": "Alice", "from_id": "user1111111111", "text": "first"},
+  {"id": 201, "type": "message", "date": "2024-08-01T10:01:00", "date_unixtime": "1722506460", "edited": "2024-08-02T09:00:00", "edited_unixtime": "1722589200", "from": "Bob", "from_id": "user2222222222", "text": "second (edited)"},
+  {"id": 202, "type": "message", "date": "2024-08-02T10:00:00", "date_unixtime": "1722592800", "from": "Alice", "from_id": "user1111111111", "text": "third"}
+ ]
+}

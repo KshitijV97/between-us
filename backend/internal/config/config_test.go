@@ -37,6 +37,20 @@ func TestLoadDefaultsToLocalProfile(t *testing.T) {
 	}
 }
 
+func TestSQLiteDSNDefaultsToDataDir(t *testing.T) {
+	cfg, err := Load(env(map[string]string{"CA_DATA_DIR": "/tmp/ca-test"}))
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if cfg.DataDir != "/tmp/ca-test" || cfg.DB.DSN != "file:/tmp/ca-test/chatanalyzer.db" {
+		t.Errorf("DataDir=%q DSN=%q", cfg.DataDir, cfg.DB.DSN)
+	}
+	cfg, err = Load(env(map[string]string{"CA_DB_DSN": "file:/elsewhere.db"}))
+	if err != nil || cfg.DB.DSN != "file:/elsewhere.db" {
+		t.Errorf("explicit DSN lost: %q %v", cfg.DB.DSN, err)
+	}
+}
+
 func TestPortOverridesProfilePortButNotExplicitAddr(t *testing.T) {
 	cfg, err := Load(env(map[string]string{
 		"CA_PROFILE": "cloud-free-container", "CA_DB_DSN": "postgres://x", "PORT": "10000",

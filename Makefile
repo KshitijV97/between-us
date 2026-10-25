@@ -69,6 +69,13 @@ embed-ui:
 docker: ## Build the container image (cloud-free-container profile)
 	docker build --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t chatanalyzer:$(VERSION) .
 
+.PHONY: demo
+demo: build ## Import a fictional 5,000-message chat into a throwaway data dir
+	@mkdir -p .demo
+	cd $(BACKEND) && go run ./cmd/synthchat -format whatsapp -n 5000 > "../.demo/WhatsApp Chat with Bob.txt"
+	CA_DATA_DIR=.demo ./$(BIN) import -tz Asia/Kolkata ".demo/WhatsApp Chat with Bob.txt"
+	@echo "Inspect with: CA_DATA_DIR=.demo ./$(BIN) chats"
+
 ## ---------------------------------------------------------------- quality
 
 .PHONY: test
@@ -112,5 +119,5 @@ check: lint test vuln ## Everything CI runs, locally
 
 .PHONY: clean
 clean: ## Remove build outputs
-	rm -rf bin $(WEB)/dist
+	rm -rf bin $(WEB)/dist .demo
 	@find $(UI_DIST) -mindepth 1 ! -name .gitkeep -delete

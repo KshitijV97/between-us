@@ -1,0 +1,13 @@
+{
+  "error": "whatsapp: no message headers found",
+  "report": {
+    "platform": "whatsapp",
+    "variant": "",
+    "time_precision": "",
+    "lines_read": 0,
+    "messages": 0,
+    "system_lines": 0,
+    "participants": null
+  },
+  "messages": []
+}

@@ -2,3 +2,5 @@
 *.png binary
 *.zip binary
 web/package-lock.json linguist-generated=true -diff
+# Parser fixtures must stay byte-exact (CRLF, BOM and invisible marks are what they test).
+backend/internal/ingest/**/testdata/** -text

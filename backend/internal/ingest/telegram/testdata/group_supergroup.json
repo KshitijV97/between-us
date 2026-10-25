@@ -1,0 +1,6 @@
+{
+ "name": "Hiking Club", "type": "private_supergroup", "id": 1700000000,
+ "messages": [
+  {"id": 1, "type": "message", "date": "2024-01-01T10:00:00", "date_unixtime": "1704103200", "from": "Alice", "from_id": "user1111111111", "text": "hi all"}
+ ]
+}

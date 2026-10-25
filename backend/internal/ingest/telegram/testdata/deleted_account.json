@@ -1,0 +1,7 @@
+{
+ "type": "personal_chat", "id": 4242424242,
+ "messages": [
+  {"id": 80, "type": "message", "date": "2023-01-01T10:00:00", "date_unixtime": "1672567200", "from": null, "from_id": "user2222222222", "text": "hello from a deleted account"},
+  {"id": 81, "type": "message", "date": "2023-01-01T10:01:00", "date_unixtime": "1672567260", "from": "Alice", "from_id": "user1111111111", "text": "hi"}
+ ]
+}
