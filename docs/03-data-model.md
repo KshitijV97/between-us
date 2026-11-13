@@ -503,6 +503,15 @@ Column lists are given in Postgres types; SQLite follows [§1.1](#11-type-mappin
 
 Combined (both participants) and chat-level metrics (M-004..M-007, M-025..M-027) are computed from these rows plus `sessions` at query time.
 
+**As implemented in M2 (SQLite, migration `00002_analytics.sql`):** each `daily_rollups` row stores the whole
+`analytics.Rollup` as JSON in a `payload` column (plus `msg_count` as a real column), keyed by
+(`chat_id`, `tz`, `local_date`, `participant_id`). Window queries read all of a chat's rows (a few thousand at
+most) and aggregate in Go, so a column per field buys nothing yet; Postgres will use `jsonb` the same way.
+`messages` gains the per-message feature columns `session_index` (−1 = not analysed or not part of a
+session), `is_turn_start`, `response_s`, `word_count`, `char_count`, `emoji_count`, `link_count`, `is_question`,
+`sentiment`, `affection_hits` and `conflict`; `sessions` is keyed by (`chat_id`, `idx`); `chats` gains
+`analyzed_at`. One analysis run writes all three inside a single transaction.
+
 **`insights`** — cached AI and rule-based outputs (FR-AI-006).
 
 | Column | Type | Notes |

@@ -1,11 +1,12 @@
 /**
  * Minimal typed HTTP client for the Between Us API.
  *
- * From M2 on, request/response types are generated from
- * backend/api/openapi.yaml (FR-API-002); this hand-written layer keeps the same
- * shape so call sites will not change. All errors surface as {@link ApiError}
+ * Request/response types are generated from backend/api/openapi.yaml
+ * (FR-API-002) into ./schema.ts; regenerate with `npm run gen:api`. All errors surface as {@link ApiError}
  * carrying the server's RFC 9457 problem details.
  */
+
+import type { components, operations } from './schema';
 
 /** RFC 9457 problem details, as written by backend/internal/httpapi. */
 export interface Problem {
@@ -29,12 +30,15 @@ export class ApiError extends Error {
   }
 }
 
-/** GET /api/v1/system/info */
-export interface SystemInfo {
-  version: string;
-  mode: 'local' | 'hosted';
-  profile: string;
-}
+/** Types generated from backend/api/openapi.yaml (`npm run gen:api`). */
+type Schemas = components['schemas'];
+export type SystemInfo = Schemas['SystemInfo'];
+export type Chat = Schemas['Chat'];
+export type MetricsResult = Schemas['MetricsResult'];
+export type MessagePage = Schemas['MessagePage'];
+
+/** Query parameters of GET /api/v1/chats/{id}/metrics. */
+export type MetricsQuery = NonNullable<operations['getChatMetrics']['parameters']['query']>;
 
 /**
  * Fetches a JSON resource. Same-origin only: the API is always served from the
@@ -61,7 +65,20 @@ async function readProblem(res: Response): Promise<Problem | undefined> {
   }
 }
 
+const opts = (signal?: AbortSignal): RequestInit | undefined => (signal ? { signal } : undefined);
+
 export const api = {
-  systemInfo: (signal?: AbortSignal) =>
-    getJSON<SystemInfo>('/api/v1/system/info', signal ? { signal } : undefined),
+  systemInfo: (signal?: AbortSignal) => getJSON<SystemInfo>('/api/v1/system/info', opts(signal)),
+  listChats: (signal?: AbortSignal) => getJSON<{ chats: Chat[] }>('/api/v1/chats', opts(signal)),
+  getChat: (id: string, signal?: AbortSignal) =>
+    getJSON<Chat>(`/api/v1/chats/${encodeURIComponent(id)}`, opts(signal)),
+  metrics: (id: string, query: MetricsQuery, signal?: AbortSignal) => {
+    const params = new URLSearchParams();
+    // exactOptionalPropertyTypes guarantees absent keys, never undefined values.
+    for (const [k, v] of Object.entries(query)) params.set(k, v);
+    return getJSON<MetricsResult>(
+      `/api/v1/chats/${encodeURIComponent(id)}/metrics?${params.toString()}`,
+      opts(signal),
+    );
+  },
 };

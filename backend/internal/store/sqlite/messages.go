@@ -184,9 +184,17 @@ func (s *Store) ListMessages(ctx context.Context, q store.MessageQuery) ([]store
 		return nil, err
 	}
 	var (
-		where = []string{"m.chat_id = ?", "m.tenant_id = ?", "m.ordinal > ?"}
-		args  = []any{q.ChatID.String(), sc.TenantID.String(), q.AfterOrdinal}
+		where = []string{"m.chat_id = ?", "m.tenant_id = ?"}
+		args  = []any{q.ChatID.String(), sc.TenantID.String()}
 	)
+	if !q.After.SentAt.IsZero() {
+		// Keyset pagination in (sent_at, ordinal) order, the same order the
+		// rows are sorted by. Ordinals alone are not monotonic in time once a
+		// later import adds older messages.
+		at := toMS(q.After.SentAt)
+		where = append(where, "(m.sent_at > ? OR (m.sent_at = ? AND m.ordinal > ?))")
+		args = append(args, at, at, q.After.Ordinal)
+	}
 	if !q.From.IsZero() {
 		where, args = append(where, "m.sent_at >= ?"), append(args, toMS(q.From))
 	}

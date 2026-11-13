@@ -86,6 +86,8 @@ gantt
 | **Requirements** | FR-ANA-001…003, FR-ANA-006, FR-API-001, FR-API-002, FR-LIB-001, FR-LIB-003 (API), FR-LIB-004, FR-AI-007 (deterministic part), NFR-PERF-003, NFR-OBS-004 |
 | **Exit criteria** | Hand-computed expected values match for every metric across five window types incl. a DST boundary (acceptance criterion 3); dashboard endpoint p95 ≤ 300 ms locally on a 1M-message synthetic chat. |
 | **Parallel split** | Agent A: sessionisation + response time + rollups. Agent B: text metrics (words, emoji, lexicons, sentiment). Agent C: HTTP layer + OpenAPI + TS client generation. Shared: `metrics` result types (lead owns). |
+| **Status** | **Done 2026-11-13** on branch `feat/m2-analytics`: contract commit, then four parallel agents (text features, builder, windows and metrics, store); the lead wired the pipeline, CLI, HTTP API and OpenAPI. Every worked example in the metrics catalog is asserted in tests, including M-025 = 82 and M-026 ≈ 44. On a 1M-message synthetic chat (26 years, 18k daily rows), metrics p95 is **42–78 ms** for day to two-year windows and **237 ms** for all-time, within the 300 ms budget. A 100k-message import plus analysis takes 8.6 s at 102 MB peak memory. |
+| **Carried forward** | M5: DB-backed job queue (local mode analyses synchronously after import). Later: incremental recompute (§11.2; full recompute takes 24 s for 1M messages); analysis memory on million-message chats (~210 MB peak, from term maps held until the end and one large write transaction; stream finished days instead); secondary rollup sets for other timezones (§11.3); metric-specific drill-down buckets (M3 uses the messages endpoint with from/to/participant). |
 
 ### M3 — Web dashboard
 

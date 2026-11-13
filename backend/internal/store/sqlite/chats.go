@@ -18,7 +18,7 @@ import (
 const deleteBatch = 5000
 
 const chatColumns = `id, tenant_id, title, platform, analysis_tz, settings, message_count,
-	first_message_at, last_message_at, created_by, created_at, archived_at`
+	first_message_at, last_message_at, created_by, created_at, archived_at, rollup_version, analyzed_at`
 
 // CreateChat implements store.Store. The tenant always comes from the scope,
 // never from c.TenantID, so a caller cannot write into another tenant.
@@ -41,6 +41,8 @@ func (s *Store) CreateChat(ctx context.Context, c store.Chat) (store.Chat, error
 	c.CreatedAt = fromMS(toMS(now))
 	c.Settings = json.RawMessage(jsonOr(c.Settings, "{}"))
 	c.MessageCount, c.FirstMessageAt, c.LastMessageAt = 0, nil, nil
+	// Analysis state is owned by AnalysisWriter.Finish; a new chat is unanalysed.
+	c.RollupVersion, c.AnalyzedAt = 0, nil
 
 	_, err = s.w.ExecContext(ctx, `
 		INSERT INTO chats (id, tenant_id, title, platform, analysis_tz, settings, created_by, created_at, updated_at, archived_at)
@@ -89,7 +91,7 @@ func (s *Store) ListChats(ctx context.Context) ([]store.Chat, error) {
 
 // DeleteChat implements store.Store: messages first in bounded batches (FTS
 // rows go with them via trigger), then the chat row, whose foreign keys
-// cascade to participants and imports.
+// cascade to participants, imports, sessions and daily rollups.
 func (s *Store) DeleteChat(ctx context.Context, id uuid.UUID) error {
 	sc, err := scope(ctx)
 	if err != nil {
@@ -236,19 +238,20 @@ type rowScanner interface {
 
 func scanChat(r rowScanner) (store.Chat, error) {
 	var (
-		c                    store.Chat
-		settings             string
-		first, last, archive sql.NullInt64
-		createdBy            uuid.NullUUID
-		created              int64
+		c                              store.Chat
+		settings                       string
+		first, last, archive, analyzed sql.NullInt64
+		createdBy                      uuid.NullUUID
+		created                        int64
 	)
 	err := r.Scan(&c.ID, &c.TenantID, &c.Title, &c.Platform, &c.AnalysisTZ, &settings, &c.MessageCount,
-		&first, &last, &createdBy, &created, &archive)
+		&first, &last, &createdBy, &created, &archive, &c.RollupVersion, &analyzed)
 	if err != nil {
 		return store.Chat{}, mapErr(err)
 	}
 	c.Settings = json.RawMessage(settings)
 	c.FirstMessageAt, c.LastMessageAt, c.ArchivedAt = fromNullMS(first), fromNullMS(last), fromNullMS(archive)
+	c.AnalyzedAt = fromNullMS(analyzed)
 	c.CreatedBy = createdBy.UUID
 	c.CreatedAt = fromMS(created)
 	return c, nil

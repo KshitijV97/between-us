@@ -1,0 +1,23 @@
+# version: 1
+# Conflict markers (M-024): phrase<TAB>strong|weak
+# One strong phrase flags a message; weak phrases need a second signal.
+leave me alone	strong
+shut up	strong
+i hate you	strong
+go to hell	strong
+fuck you	strong
+screw you	strong
+how dare you	strong
+don't talk to me	strong
+get lost	strong
+whatever	weak
+you always	weak
+you never	weak
+i don't care	weak
+stop it	weak
+enough	weak
+seriously	weak
+idiot	weak
+stupid	weak
+liar	weak
+not again	weak

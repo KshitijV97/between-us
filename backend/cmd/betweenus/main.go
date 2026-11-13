@@ -4,6 +4,8 @@
 //	serve     run the HTTP API, web UI and in-process workers
 //	import    import a WhatsApp or Telegram export (FR-ING-001)
 //	chats     list or delete imported chats (FR-LIB-001, FR-LIB-002)
+//	metrics   show metrics for a period (FR-ANA-001…003)
+//	analyze   recompute sessions, features and daily rollups
 //	migrate   apply database migrations (NFR-REL-004)
 //	version   print build information
 //
@@ -19,12 +21,15 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 
+	"github.com/kshitijv97/between-us/backend/internal/analysis"
 	"github.com/kshitijv97/between-us/backend/internal/buildinfo"
 	"github.com/kshitijv97/between-us/backend/internal/config"
 	"github.com/kshitijv97/between-us/backend/internal/httpapi"
 	"github.com/kshitijv97/between-us/backend/internal/telemetry"
+	"github.com/kshitijv97/between-us/backend/internal/tenancy"
 	"github.com/kshitijv97/between-us/backend/internal/webui"
 )
 
@@ -35,7 +40,15 @@ const (
 	exitUsage = 2
 )
 
+// defaultMemoryLimit is a soft heap limit: past it the garbage collector
+// works harder instead of letting the process grow (NFR-PERF-001). It is not
+// a cap; live data above it still fits. GOMEMLIMIT overrides it.
+const defaultMemoryLimit = 128 << 20
+
 func main() {
+	if os.Getenv("GOMEMLIMIT") == "" {
+		debug.SetMemoryLimit(defaultMemoryLimit)
+	}
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
 }
 
@@ -55,6 +68,10 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return importCmd(rest, stdout, stderr)
 	case "chats":
 		return chatsCmd(rest, stdout, stderr)
+	case "metrics":
+		return metricsCmd(rest, stdout, stderr)
+	case "analyze":
+		return analyzeCmd(rest, stdout, stderr)
 	case "migrate":
 		return migrateCmd(stderr)
 	case "help", "-h", "--help":
@@ -74,6 +91,8 @@ Commands:
   serve     Run the HTTP API and web UI
   import    Import a WhatsApp or Telegram export (run "import -h" for flags)
   chats     List chats, or "chats delete <id>"
+  metrics   Show a chat's metrics for a day, week, month, year or custom period
+  analyze   Recompute a chat's derived data (runs automatically after import)
   migrate   Apply database migrations
   version   Print build information (-json for machine-readable output)
   help      Show this help
@@ -125,7 +144,20 @@ func serve(args []string, stderr io.Writer) int {
 		checks["db"] = st.Ping
 	}
 
-	srv := httpapi.New(httpapi.Options{Config: cfg, Logger: log, UI: webui.FS(), Checks: checks})
+	opts := httpapi.Options{Config: cfg, Logger: log, UI: webui.FS(), Checks: checks}
+	if st != nil {
+		opts.Store = st
+		opts.Analysis = &analysis.Service{Store: st, LexiconDir: cfg.LexiconDir, Log: log}
+		if !cfg.IsHosted() {
+			t, u, err := st.EnsureLocalTenant(ctx)
+			if err != nil {
+				log.Error("preparing local workspace failed", "error", err)
+				return exitError
+			}
+			opts.LocalScope = &tenancy.Scope{TenantID: t.ID, UserID: u.ID}
+		}
+	}
+	srv := httpapi.New(opts)
 	if err := srv.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 		log.Error("server stopped with error", "error", err)
 		return exitError

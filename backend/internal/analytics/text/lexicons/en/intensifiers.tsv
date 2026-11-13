@@ -1,0 +1,22 @@
+# version: 1
+# Intensifiers and dampeners (M-022): term<TAB>multiplier applied to the next sentiment word.
+very	1.3
+really	1.25
+so	1.2
+extremely	1.4
+super	1.3
+totally	1.25
+absolutely	1.35
+completely	1.3
+incredibly	1.4
+truly	1.25
+quite	1.1
+too	1.15
+highly	1.3
+hella	1.3
+mega	1.2
+slightly	0.8
+somewhat	0.85
+kinda	0.85
+barely	0.6
+hardly	0.6

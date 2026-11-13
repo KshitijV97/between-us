@@ -12,6 +12,7 @@ package analytics
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -29,7 +30,20 @@ func DateOf(t time.Time, loc *time.Location) Date {
 // DateFromYMD builds a Date from its fields; out-of-range days normalise like
 // time.Date (Feb 30 → Mar 1/2).
 func DateFromYMD(y int, m time.Month, d int) Date {
-	return Date(time.Date(y, m, d, 0, 0, 0, 0, time.UTC).Unix() / 86400)
+	return dateFromDays(time.Date(y, m, d, 0, 0, 0, 0, time.UTC).Unix() / 86400)
+}
+
+// dateFromDays converts a day count to a Date, saturating instead of wrapping
+// for values outside the int32 range (±5.8 million years; only reachable
+// with absurd input, but an overflow must never turn into a valid-looking date).
+func dateFromDays(n int64) Date {
+	switch {
+	case n > math.MaxInt32:
+		return math.MaxInt32
+	case n < math.MinInt32:
+		return math.MinInt32
+	}
+	return Date(n)
 }
 
 // ParseDate parses "YYYY-MM-DD".
@@ -38,7 +52,7 @@ func ParseDate(s string) (Date, error) {
 	if err != nil {
 		return 0, fmt.Errorf("invalid date %q (want YYYY-MM-DD)", s)
 	}
-	return Date(t.Unix() / 86400), nil
+	return dateFromDays(t.Unix() / 86400), nil
 }
 
 // Time returns the date at 00:00 UTC; use only for its Y/M/D fields.
@@ -48,7 +62,7 @@ func (d Date) Time() time.Time { return time.Unix(int64(d)*86400, 0).UTC() }
 func (d Date) String() string { return d.Time().Format(time.DateOnly) }
 
 // AddDays returns d shifted by n days.
-func (d Date) AddDays(n int) Date { return d + Date(n) }
+func (d Date) AddDays(n int) Date { return dateFromDays(int64(d) + int64(n)) }
 
 // Weekday returns the day of the week.
 func (d Date) Weekday() time.Weekday { return d.Time().Weekday() }

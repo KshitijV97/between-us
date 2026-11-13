@@ -9,6 +9,40 @@ For a feature-by-feature view, including what is planned, see [FEATURES.md](FEAT
 
 ## [Unreleased]
 
+### M2 — Analytics engine and API (2026-11-13)
+
+#### Added
+
+- Analytics engine (`internal/analytics`): streaming builder for sessions, turns, response times and daily
+  rollups with mergeable histograms; window resolution for day/week/month/year/all/custom with comparison
+  windows; all 27 metrics M-001…M-027 including reciprocity, engagement and trends.
+- Text features (`internal/analytics/text`): UAX #29 words and graphemes, emoji, links with eTLD+1 domains,
+  questions, VADER-style sentiment, affection and conflict markers, top terms and bigrams; embedded English,
+  romanised-Hindi and emoji lexicons in plain TSV.
+- Store: migration `00002_analytics` (message feature columns, sessions, daily rollups with separately stored
+  term maps), single-transaction analysis runs, a light rollup index, ranged rollup reads, and a
+  `(sent_at, ordinal)` message cursor.
+- Pipeline (`internal/analysis`): analyse after import, re-analyse on demand or on settings change, exact
+  percentiles and top terms for short windows.
+- CLI: `betweenus metrics`, `betweenus analyze`; imports analyse automatically.
+- HTTP API: `/api/v1/chats`, `/chats/{id}`, `/metrics`, `/messages`, `/search`, `/settings`, `DELETE`;
+  OpenAPI 3.1 spec and generated TypeScript types with a CI drift check.
+- A 128 MiB soft memory limit by default (`GOMEMLIMIT` overrides it).
+
+#### Fixed (found while verifying M2)
+
+- Without an anchor, a month window resolved to January 1970 instead of the chat's latest month.
+- Metric selection (`metrics=M-001,…`) was ignored by the pipeline.
+- Window errors were reported as server errors; they are now `400` responses.
+- All-time metrics on a 1M-message chat took 689 ms (p95); reading only the window's rows, merging maps per
+  participant and computing trends without maps brought every window under 300 ms.
+- Date conversions could overflow on absurd input; they now saturate.
+
+#### Known limitations
+
+- Analysis recomputes the whole chat (24 s for 1M messages) and peaks around 210 MB on million-message chats.
+- Rollups exist only for the chat's own timezone; other timezones are not served yet.
+
 ### Rename (2026-10-25)
 
 #### Changed

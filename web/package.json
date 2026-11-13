@@ -18,7 +18,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "size": "node scripts/check-bundle-size.mjs"
+    "size": "node scripts/check-bundle-size.mjs",
+    "gen:api": "npx -y openapi-typescript@7.13.0 ../backend/api/openapi.yaml -o src/api/schema.ts && prettier --write src/api/schema.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "5.107.1",

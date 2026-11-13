@@ -702,41 +702,51 @@ rollup values.
 
 ### 9.3 Lexicon extension format
 
-Lexicons are plain files embedded in the binary (`backend/internal/analytics/lexicons/`) and overridable by
-a directory set in `BU_LEXICON_DIR`:
+Lexicons are plain files embedded in the binary (`backend/internal/analytics/text/lexicons/`) and overridable
+file by file from a directory set in `BU_LEXICON_DIR`. They are deliberately plain text (no YAML dependency):
 
 ```text
 lexicons/
   en/
     stopwords.txt          # one term per line, '#' comments
     interrogatives.txt     # question openers (M-017); multi-word allowed
-    sentiment.tsv          # term<TAB>valence(-4..4)   e.g.  awesome	3.1
-    affection.yaml         # M-023 phrases and emoji
-    conflict.yaml          # M-024 phrases, with strength: strong|weak
-    negations.txt
-    intensifiers.tsv       # term<TAB>multiplier      e.g.  very	1.3
+    sentiment.tsv          # term<TAB>valence(-4..4)          e.g.  awesome	3.1
+    negations.txt          # term[<TAB>both]                  "both" = also negates the preceding word
+    intensifiers.tsv       # term<TAB>multiplier              e.g.  very	1.3
+    affection.tsv          # phrase<TAB>weight[<TAB>whole_word]   M-023
+    conflict.tsv           # phrase<TAB>strong|weak               M-024
   hi-Latn/
     stopwords.txt
-    variants.tsv           # variant<TAB>canonical
+    variants.tsv           # variant<TAB>canonical            e.g.  achha	accha
     sentiment.tsv          # e.g.  bekar	-2.0   mast	2.5   pyaar	3.0
     ...
   emoji/
-    sentiment.tsv          # emoji<TAB>valence      e.g.  😭	-1.5   ❤️	3.0
+    sentiment.tsv          # emoji<TAB>valence                e.g.  😭	-1.5   ❤️	3.0
     affection.txt
 ```
 
-```yaml
-# lexicons/hi-Latn/affection.yaml
-version: 3
-phrases:
-  - { text: "miss kar raha", weight: 1.0 }
-  - { text: "yaad aa rahi",  weight: 1.0 }
-  - { text: "jaan",          weight: 0.8, whole_word: true }
-negation_window: 3   # tokens before a phrase in which a negation cancels it
-```
+Every file starts with a `# version: N` comment; `text.Analyzer.LexiconHash()` digests the loaded files so a
+lexicon change can feed `ROLLUP_VERSION` (§11).
 
-Every lexicon file carries a `version`; the combined lexicon hash is part of `ROLLUP_VERSION`'s input (§11)
-so changing a lexicon re-scores the affected chats.
+### 9.4 Implementation notes (M2)
+
+Choices made where this catalog was ambiguous; the code and tests follow these.
+
+| Topic | Behaviour |
+|---|---|
+| Text metrics scope | Words, characters, emoji, links and questions come from text messages and media captions only; locations, contacts and polls are not analysed as text. |
+| Forwarded messages | Still count toward words, emoji, links and questions; excluded only from sentiment, affection, conflict and top terms (unless `include_forwarded_in_text_metrics`). |
+| Turns | A turn is attributed to the day of its first message. |
+| Calls | Attributed to the sending participant; a call without details is a voice call. Call-only days create rollup rows with `msg_count = 0` and no first/last timestamps, which are ignored for active days, streaks and silences. |
+| Romanised-Hindi negation | `nahi`, `mat`, … negate the word directly before them and up to two words after ("accha nahi hai" is negative, "nahi yaar, bahut accha" is not); `na` is excluded because it is mostly a tag ("hai na?"). |
+| Affection weights | Stored but not yet used; every match counts as one hit. |
+| M-025 response dimension | Needs at least min(3, `min_msgs_for_scores`) responses per participant; otherwise its weight is redistributed. |
+| M-026 | An undefined component's weight is redistributed like M-025; the score is null whenever M-025 is null. |
+| M-016 | Flagged approximate whenever merged daily maps were used for a window longer than one day. |
+| Comparisons | Each metric carries a `change` object (`prev`, `delta`, `delta_pct`, `per_day_delta`) instead of the flat fields sketched in §12. |
+| M-006, empty window | Longest silence = `min(to, now) − from`, flagged `ongoing` and `no_messages`. |
+| Default window | Without an anchor, a day/week/month/year window resolves around the chat's last active day. |
+| Emoji detection | Symbols Unicode marks as pictographic (©, ™) count as emoji. |
 
 ## 10. Configuration parameters
 

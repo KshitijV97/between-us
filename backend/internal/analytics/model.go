@@ -210,6 +210,22 @@ type Rollup struct {
 	TermsOtherCount int            `json:"terms_other_count"`
 }
 
+// RollupLite is the light part of a rollup row: what chat-level facts need
+// (chat span, participants, the M-001 baseline, M-006 clipping) without
+// decoding the full row. Reading every row of a long chat this way stays
+// cheap, so only the rows inside a window have to be decoded.
+type RollupLite struct {
+	ParticipantID uuid.UUID
+	Date          Date
+	MsgCount      int
+	LastMsgAt     time.Time // zero when MsgCount == 0
+}
+
+// Lite returns the light part of r.
+func (r *Rollup) Lite() RollupLite {
+	return RollupLite{ParticipantID: r.ParticipantID, Date: r.Date, MsgCount: r.MsgCount, LastMsgAt: r.LastMsgAt}
+}
+
 // BuildOutput is what a full analysis run produces besides streamed message
 // features and sessions.
 type BuildOutput struct {

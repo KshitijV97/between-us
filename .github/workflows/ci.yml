@@ -57,6 +57,11 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci --no-fund
       - run: npm run -s format:check
+      - name: Generated API types match backend/api/openapi.yaml (FR-API-002)
+        run: |
+          npm run -s gen:api
+          git diff --exit-code -- src/api/schema.ts || {
+            echo "::error::src/api/schema.ts is stale; run 'npm run gen:api' in web/ and commit"; exit 1; }
       - run: npm run -s lint
       - run: npm run -s typecheck
       - run: npm test

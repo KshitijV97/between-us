@@ -1,0 +1,21 @@
+# version: 1
+# Romanised Hindi affection markers (M-023): phrase<TAB>weight[<TAB>whole_word]
+yaad aa rahi	1.0
+yaad aa raha	1.0
+yaad aa rahe	1.0
+yaad aati	1.0
+yaad aata	1.0
+miss kar raha	1.0
+miss kar rahi	1.0
+miss kar rahe	1.0
+pyaar	0.8	whole_word
+pyaar karta	1.0
+pyaar karti	1.0
+jaan	0.8	whole_word
+jaanu	0.8	whole_word
+meri jaan	1.0
+mera bachha	0.8
+khayal rakhna	0.8
+apna khayal rakhna	1.0
+dil se	0.6
+love you yaar	1.0

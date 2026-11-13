@@ -1,0 +1,6 @@
+# version: 1
+# Romanised Hindi negations. Hindi negation often follows the word it negates
+# ("accha nahi hai"), so these are marked "both": they negate one preceding
+# and up to two following words. "na" is excluded: it is mostly a tag ("hai na?").
+nahi	both
+mat	both

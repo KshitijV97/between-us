@@ -10,6 +10,17 @@ history see the [changelog](CHANGELOG.md); for scope and requirement IDs see the
 
 ## ✅ Shipped
 
+### M2 — Analytics engine and API (2026-11-13)
+
+| Feature | How to use | Requirements |
+|---|---|---|
+| **All 27 metrics** for any period: messages and share of voice, words and message length, active days, streaks, longest silence, conversations, who starts and who ends them, reply time and reply rate, double-texting, hour × weekday heatmap, late-night share, emoji, top words and phrases, questions, links, media, deleted/edited/forwarded, calls, sentiment, affection and tense moments, balance (0–100), engagement (0–100) and trends | `betweenus metrics <chat id>` (`-json` for everything) | M-001…M-027 |
+| **Any window:** day, week, month, year, all time or a custom range, in the chat's timezone, with comparison to the previous period and an all-time baseline | `-window`, `-anchor`, `-from`/`-to` | FR-ANA-001, FR-ANA-002 |
+| **English and Hinglish text analysis:** sentiment with negation (`accha nahi hai`), intensifiers (`bahut`), spelling variants (`acha/accha/achha`), emoji, questions (`kya`, `kaise`), affection (`miss you`, `yaad aa rahi`) | automatic; word lists overridable with `BU_LEXICON_DIR` | §9 |
+| **Analysis settings per chat:** conversation gap, double-text gap, week start, late-night hours, languages, forwarded-message handling, score weights | `PUT /api/v1/chats/{id}/settings` | FR-ANA-006 |
+| **HTTP API:** chats, metrics, message browsing with a stable cursor, full-text search, settings, delete; OpenAPI 3.1 spec with generated TypeScript types | `betweenus serve`, [`backend/api/openapi.yaml`](backend/api/openapi.yaml) | FR-API-001/002, FR-LIB-001…004 |
+| **Fast on huge chats:** 42–78 ms for day to two-year windows and 237 ms for all time on a 1M-message chat | automatic | NFR-PERF-003 |
+
 ### M1 — Import (2026-10-25)
 
 | Feature | How to use | Requirements |
@@ -44,7 +55,6 @@ history see the [changelog](CHANGELOG.md); for scope and requirement IDs see the
 
 | Milestone | Features | Requirements |
 |---|---|---|
-| **M2 — Analytics engine and API** | Conversations (sessions), who initiates and ends, response times, reply rate, double-texting, streaks and silences, hour × weekday heatmap, late-night activity, emoji and top words (incl. Hinglish), questions, links, media counts, calls, lexicon sentiment, affection and conflict markers, balance and engagement scores; for any **day, week, month, year or custom range**, compared with the previous period; versioned REST API | FR-ANA-001…006, M-001…M-027, FR-API-001/002 |
 | **M3 — Web dashboard** | Import in the browser (drag and drop, preview, "this is me", timezone, consent), chat library, charts with drill-down to messages, message browser with search and permalinks, PWA for phones, accessibility pass | FR-ING-001, FR-LIB-001…004, FR-ANA-004/005, NFR-UX-* |
 | **M4 — AI insights and Q&A** | Relationship profile, mood and mind per person and period, period summaries, topic timeline, questions over a period answered with message citations; local Ollama by default, works without any AI | FR-AI-001…007 |
 | **M5 — Hosted and multi-tenant** | PostgreSQL with row-level security, sign-in (local, Supabase, OIDC), workspaces, quotas, audit log, data export and account deletion, free deployment on Vercel + Supabase/Aiven | MT-*, FR-ADM-*, PRV-004…006 |

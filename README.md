@@ -3,8 +3,9 @@
 > Understand a two-person conversation: metrics, relationship patterns, mood and mind over time, and
 > questions answered with citations, from a WhatsApp or Telegram chat export. Local-first, lean, and free to host.
 
-**Status:** 🏗️ Milestones **M0 (foundation)** and **M1 (import)** complete: WhatsApp and Telegram exports
-import into a local SQLite database from the command line. Analytics and the dashboard come next (M2, M3).
+**Status:** 🏗️ Milestones **M0 (foundation)**, **M1 (import)** and **M2 (analytics)** complete: import a
+WhatsApp or Telegram export and get all 27 metrics for any day, week, month, year or custom period, from the
+command line or the HTTP API. The web dashboard comes next (M3).
 See the [roadmap](docs/10-roadmap.md).
 
 ---
@@ -43,11 +44,21 @@ Other targets: `make test`, `make lint`, `make vuln`, `make check` (everything C
 ```
 
 `-dry-run` shows the detected format, participants, period and warnings without writing anything. Drop it to
-import; add `-tz Asia/Kolkata` if the phone that exported the chat was in a different timezone from this
+import (the chat is analysed straight away); add `-tz Asia/Kolkata` if the phone that exported the chat was in a different timezone from this
 computer, and `-me <key>` to mark yourself. Re-importing a newer export of the same chat with
 `-chat <id>` adds only the new messages. `betweenus chats` lists chats and `betweenus chats delete <id>`
 removes one with all of its messages. Data lives in your OS's per-user app-data folder (override with
 `BU_DATA_DIR`).
+
+See the metrics for any period:
+
+```bash
+./bin/betweenus metrics <chat id>
+```
+
+That shows the chat's latest month. Use `-window week|month|year|all`, `-anchor 2024-06-01` to pick the period,
+`-window custom -from 2024-01-01 -to 2024-03-31` for a range, and `-json` for all 27 metrics in full. The same data
+is served by the HTTP API (`betweenus serve`, spec in [`backend/api/openapi.yaml`](backend/api/openapi.yaml)).
 
 No real chat handy? Generate a fictional one:
 

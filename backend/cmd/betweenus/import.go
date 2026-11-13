@@ -19,6 +19,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/kshitijv97/between-us/backend/internal/analysis"
 	"github.com/kshitijv97/between-us/backend/internal/importer"
 	"github.com/kshitijv97/between-us/backend/internal/ingest"
 	"github.com/kshitijv97/between-us/backend/internal/ingest/archive"
@@ -157,6 +158,13 @@ func importCmd(args []string, stdout, stderr io.Writer) int {
 		}
 		return exitError
 	}
+	// Analyse straight away so metrics are ready (no background jobs in local
+	// mode). A failure here keeps the import: `betweenus analyze` can retry.
+	svc := &analysis.Service{Store: a.store, LexiconDir: a.cfg.LexiconDir, Log: a.log}
+	if _, err := svc.Analyze(ctx, res.Chat.ID); err != nil {
+		fmt.Fprintln(stderr, "warning: import succeeded but analysis failed:", err)
+		fmt.Fprintf(stderr, "retry with: betweenus analyze %s\n", res.Chat.ID)
+	}
 	if *asJSON {
 		return printJSON(stdout, map[string]any{
 			"chat_id": res.Chat.ID, "import_id": res.Import.ID, "inserted": res.Inserted,
@@ -244,6 +252,7 @@ func printResult(w io.Writer, res importer.Result, up *archive.Upload, zone stri
 		fmt.Fprintf(w, ", %d from other senders skipped", res.Filtered)
 	}
 	fmt.Fprintf(w, "\nChat total   %d messages\n", res.Chat.MessageCount)
+	fmt.Fprintf(w, "\nSee the metrics: betweenus metrics %s\n", res.Chat.ID)
 }
 
 func printReport(w io.Writer, r ingest.Report, up *archive.Upload, zone string) {

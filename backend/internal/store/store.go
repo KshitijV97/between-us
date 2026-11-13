@@ -159,6 +159,19 @@ type MessageQuery struct {
 	Limit int
 }
 
+// RollupQuery narrows ListRollups.
+type RollupQuery struct {
+	// Ranges are half-open date ranges to include; empty means every row.
+	Ranges []DateRange
+	// WithTerms also decodes TopTerms and TopBigrams. Only windows longer
+	// than Settings.ExactTermsMaxDays need them, and they dominate decode
+	// cost, so they are stored apart and skipped otherwise.
+	WithTerms bool
+}
+
+// DateRange is a half-open range of local dates [From, To).
+type DateRange struct{ From, To analytics.Date }
+
 // MessageCursor is a position in a chat's (SentAt, Ordinal) order. A pair is
 // needed because ordinals of a later import can precede earlier SentAt values.
 type MessageCursor struct {
@@ -252,9 +265,12 @@ type Store interface {
 	IterateAnalysisMessages(ctx context.Context, chatID uuid.UUID, from, to time.Time, fn func(*analytics.Message) error) error
 	// BeginAnalysis starts an analysis run writing rollups for timezone tz.
 	BeginAnalysis(ctx context.Context, chatID uuid.UUID, tz string) (AnalysisWriter, error)
-	// ListRollups returns all rollups of the chat for tz, ordered by
-	// (Date, ParticipantID). A chat has at most a few thousand rows.
-	ListRollups(ctx context.Context, chatID uuid.UUID, tz string) ([]analytics.Rollup, error)
+	// ListRollups returns the chat's rollups for tz matching q, ordered by
+	// (Date, ParticipantID).
+	ListRollups(ctx context.Context, chatID uuid.UUID, tz string, q RollupQuery) ([]analytics.Rollup, error)
+	// RollupIndex returns the light facts of every rollup row of the chat
+	// for tz, ordered by (Date, ParticipantID), without decoding payloads.
+	RollupIndex(ctx context.Context, chatID uuid.UUID, tz string) ([]analytics.RollupLite, error)
 	// ListSessions returns sessions that started in [from, to) (zero =
 	// unbounded), ordered by start.
 	ListSessions(ctx context.Context, chatID uuid.UUID, from, to time.Time) ([]analytics.Session, error)

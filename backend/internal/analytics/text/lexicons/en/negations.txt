@@ -1,0 +1,46 @@
+# version: 1
+# Negations (M-022, M-023). English negations precede what they negate.
+# Format: term[<TAB>both] — "both" also negates up to two following words.
+not
+no
+never
+neither
+nor
+none
+nothing
+nobody
+nowhere
+cannot
+can't
+cant
+don't
+dont
+doesn't
+doesnt
+didn't
+didnt
+isn't
+isnt
+wasn't
+wasnt
+aren't
+arent
+weren't
+werent
+won't
+wont
+wouldn't
+wouldnt
+shouldn't
+shouldnt
+couldn't
+couldnt
+haven't
+havent
+hasn't
+hasnt
+hadn't
+hadnt
+ain't
+aint
+without

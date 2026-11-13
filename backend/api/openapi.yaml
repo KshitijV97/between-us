@@ -1,0 +1,389 @@
+openapi: 3.1.0
+info:
+  title: Between Us API
+  version: 0.2.0
+  summary: Local-first analytics for two-person chat exports.
+  description: |
+    Versioned REST API used by the web UI (FR-API-001). All responses are JSON; errors use
+    RFC 9457 problem details. In local mode every request runs in the single implicit
+    workspace; hosted sign-in arrives in M5.
+
+    Metric definitions and formulas: docs/04-metrics-catalog.md.
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+servers:
+  - url: http://127.0.0.1:7420
+    description: Local single binary
+tags:
+  - name: system
+  - name: chats
+  - name: metrics
+  - name: messages
+
+paths:
+  /healthz:
+    get:
+      tags: [system]
+      summary: Liveness probe
+      operationId: getHealthz
+      responses:
+        '200':
+          description: The process is serving HTTP.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Status' }
+  /readyz:
+    get:
+      tags: [system]
+      summary: Readiness probe (database and migrations)
+      operationId: getReadyz
+      responses:
+        '200':
+          description: Ready.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Readiness' }
+        '503':
+          description: A dependency is not ready.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Readiness' }
+  /version:
+    get:
+      tags: [system]
+      summary: Build information
+      operationId: getVersion
+      responses:
+        '200':
+          description: Build metadata.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BuildInfo' }
+  /api/v1/system/info:
+    get:
+      tags: [system]
+      summary: Mode and profile the server runs in
+      operationId: getSystemInfo
+      responses:
+        '200':
+          description: System information.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SystemInfo' }
+
+  /api/v1/chats:
+    get:
+      tags: [chats]
+      summary: List chats (FR-LIB-001)
+      operationId: listChats
+      responses:
+        '200':
+          description: Chats in the workspace.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [chats]
+                properties:
+                  chats:
+                    type: array
+                    items: { $ref: '#/components/schemas/Chat' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /api/v1/chats/{chatID}:
+    parameters:
+      - $ref: '#/components/parameters/ChatID'
+    get:
+      tags: [chats]
+      summary: Get a chat with its participants and effective settings
+      operationId: getChat
+      responses:
+        '200':
+          description: The chat.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Chat' }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [chats]
+      summary: Permanently delete a chat and everything derived from it (FR-LIB-002)
+      operationId: deleteChat
+      responses:
+        '204': { description: Deleted. }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /api/v1/chats/{chatID}/settings:
+    parameters:
+      - $ref: '#/components/parameters/ChatID'
+    put:
+      tags: [chats]
+      summary: Replace analysis settings and re-analyse (FR-ANA-006)
+      operationId: putChatSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Settings' }
+      responses:
+        '200':
+          description: Normalised settings now in effect.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [settings]
+                properties:
+                  settings: { $ref: '#/components/schemas/Settings' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /api/v1/chats/{chatID}/metrics:
+    parameters:
+      - $ref: '#/components/parameters/ChatID'
+    get:
+      tags: [metrics]
+      summary: Metrics M-001…M-027 for one window (FR-ANA-001…003)
+      operationId: getChatMetrics
+      parameters:
+        - name: window
+          in: query
+          schema: { type: string, enum: [day, week, month, year, all, custom], default: month }
+        - name: anchor
+          in: query
+          description: A date inside the period; defaults to the chat's last day.
+          schema: { type: string, format: date }
+        - name: from
+          in: query
+          description: First day of a custom window (inclusive).
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          description: Last day of a custom window (inclusive).
+          schema: { type: string, format: date }
+        - name: compare
+          in: query
+          description: '"previous" adds the previous window and deltas (FR-ANA-002).'
+          schema: { type: string, enum: [previous] }
+        - name: metrics
+          in: query
+          description: Comma-separated metric IDs to compute, e.g. M-001,M-010. Default all.
+          schema: { type: string }
+      responses:
+        '200':
+          description: Metric results.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MetricsResult' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /api/v1/chats/{chatID}/messages:
+    parameters:
+      - $ref: '#/components/parameters/ChatID'
+    get:
+      tags: [messages]
+      summary: Page through messages; also the drill-down behind chart points (FR-LIB-003, FR-ANA-005)
+      operationId: listMessages
+      parameters:
+        - { name: from, in: query, description: 'Start (RFC 3339 or date, inclusive).', schema: { type: string } }
+        - { name: to, in: query, description: 'End (RFC 3339 or date, exclusive).', schema: { type: string } }
+        - { name: participant, in: query, schema: { type: string, format: uuid } }
+        - { name: after_sent_at, in: query, description: Cursor from `next`., schema: { type: string, format: date-time } }
+        - { name: after_ordinal, in: query, description: Cursor from `next`., schema: { type: integer, format: int64 } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 100 } }
+      responses:
+        '200':
+          description: A page of messages.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessagePage' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /api/v1/chats/{chatID}/search:
+    parameters:
+      - $ref: '#/components/parameters/ChatID'
+    get:
+      tags: [messages]
+      summary: Full-text search over message bodies (FR-LIB-003)
+      operationId: searchMessages
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, minLength: 1 } }
+      responses:
+        '200':
+          description: Best matches first.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [messages]
+                properties:
+                  messages:
+                    type: array
+                    items: { $ref: '#/components/schemas/Message' }
+        default: { $ref: '#/components/responses/Problem' }
+
+components:
+  parameters:
+    ChatID:
+      name: chatID
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    Problem:
+      description: An RFC 9457 problem.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        request_id: { type: string }
+    Status:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+    Readiness:
+      type: object
+      required: [status, checks]
+      properties:
+        status: { type: string, enum: [ok, unavailable] }
+        checks:
+          type: object
+          additionalProperties: { type: string, enum: [ok, fail] }
+    BuildInfo:
+      type: object
+      properties:
+        version: { type: string }
+        commit: { type: string }
+        date: { type: string }
+        go_version: { type: string }
+        platform: { type: string }
+        modified: { type: boolean }
+    SystemInfo:
+      type: object
+      required: [version, mode, profile]
+      properties:
+        version: { type: string }
+        mode: { type: string, enum: [local, hosted] }
+        profile: { type: string }
+
+    Participant:
+      type: object
+      required: [id, display_name, is_me]
+      properties:
+        id: { type: string, format: uuid }
+        display_name: { type: string }
+        alias: { type: string }
+        is_me: { type: boolean }
+    Chat:
+      type: object
+      required: [id, title, platform, analysis_tz, message_count]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        platform: { type: string, enum: [whatsapp, telegram] }
+        analysis_tz: { type: string, description: IANA timezone used for local dates. }
+        message_count: { type: integer, format: int64 }
+        first_message_at: { type: string, format: date-time }
+        last_message_at: { type: string, format: date-time }
+        analyzed_at: { type: string, format: date-time }
+        settings: { $ref: '#/components/schemas/Settings' }
+        participants:
+          type: array
+          items: { $ref: '#/components/schemas/Participant' }
+    Settings:
+      type: object
+      description: Analysis settings (docs/04-metrics-catalog.md §10); omitted keys keep their defaults.
+      properties:
+        session_gap: { type: string, example: 6h0m0s }
+        double_text_gap: { type: string, example: 30m0s }
+        week_start: { type: integer, minimum: 0, maximum: 6, description: 0 = Sunday, 1 = Monday. }
+        late_night_from: { type: integer, minimum: 0, maximum: 23 }
+        late_night_to: { type: integer, minimum: 1, maximum: 24 }
+        text_languages: { type: array, items: { type: string }, example: [en, hi-Latn] }
+        include_forwarded_in_text_metrics: { type: boolean }
+        emoji_normalise_modifiers: { type: boolean }
+        count_text_emoticons: { type: boolean }
+        exact_terms_max_days: { type: integer }
+        exact_percentiles_max_days: { type: integer }
+        min_msgs_for_scores: { type: integer }
+        engagement_weights:
+          type: array
+          items: { type: number }
+          minItems: 5
+          maxItems: 5
+
+    Window:
+      type: object
+      required: [kind, from, to, tz, days, coverage, partial]
+      properties:
+        kind: { type: string, enum: [day, week, month, year, all, custom] }
+        from: { type: string, format: date, description: First day (inclusive). }
+        to: { type: string, format: date, description: Day after the last day (exclusive). }
+        tz: { type: string }
+        days: { type: integer }
+        coverage: { type: number, description: Share of days inside the chat's span. }
+        partial: { type: boolean }
+    MetricsResult:
+      type: object
+      required: [window, rollup_version, participants, metrics]
+      properties:
+        window: { $ref: '#/components/schemas/Window' }
+        compare: { $ref: '#/components/schemas/Window' }
+        rollup_version: { type: integer }
+        stale: { type: boolean, description: Derived data predates the current formulas. }
+        participants:
+          type: array
+          items:
+            type: object
+            required: [id, label]
+            properties:
+              id: { type: string, format: uuid }
+              label: { type: string }
+        metrics:
+          type: object
+          description: |
+            Keyed by metric ID ("M-001"…"M-027"). Each value's shape is defined per metric in
+            docs/04-metrics-catalog.md §8 and backend/internal/analytics/result.go; per-participant
+            values are keyed by participant ID, comparisons live in a `change` object.
+          additionalProperties:
+            type: object
+            additionalProperties: true
+
+    Message:
+      type: object
+      required: [id, sent_at, ordinal, kind]
+      properties:
+        id: { type: integer, format: int64 }
+        participant_id: { type: string, format: uuid }
+        sent_at: { type: string, format: date-time }
+        ordinal: { type: integer, format: int64 }
+        kind: { type: string, enum: [text, media, call, location, contact, poll, deleted, system] }
+        media_type: { type: string }
+        body: { type: string }
+        is_edited: { type: boolean }
+        is_forwarded: { type: boolean }
+        is_deleted: { type: boolean }
+        reply_to_id: { type: integer, format: int64 }
+    MessagePage:
+      type: object
+      required: [messages]
+      properties:
+        messages:
+          type: array
+          items: { $ref: '#/components/schemas/Message' }
+        next:
+          type: object
+          description: Cursor for the next page; absent on the last page.
+          properties:
+            after_sent_at: { type: string, format: date-time }
+            after_ordinal: { type: integer, format: int64 }

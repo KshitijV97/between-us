@@ -58,6 +58,14 @@ func Run(t *testing.T, newStore func(t *testing.T) store.Store) {
 		{"DeleteChatCascades", testDeleteChat},
 		{"TenantIsolation", testTenantIsolation},
 		{"ConcurrentReadsDuringWrites", testConcurrency},
+		{"ListMessagesCursorPairs", testCursorPairs},
+		{"ChatSettings", testChatSettings},
+		{"AnalysisRunRoundTrip", testAnalysisRoundTrip},
+		{"AnalysisAbortKeepsPreviousResults", testAnalysisAbort},
+		{"AnalysisReadersSeeNoPartialResults", testAnalysisReaders},
+		{"IterateAnalysisMessages", testIterateAnalysis},
+		{"AnalysisRejectsForeignMessages", testAnalysisForeignMessages},
+		{"AnalyticsTenantIsolation", testAnalyticsTenantIsolation},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -208,6 +216,9 @@ func testMissingScope(t *testing.T, e *env) {
 		"ListMessages":   func() error { _, err := e.s.ListMessages(ctx, store.MessageQuery{ChatID: id}); return err },
 		"CountMessages":  func() error { _, err := e.s.CountMessages(ctx, id); return err },
 		"SearchMessages": func() error { _, err := e.s.SearchMessages(ctx, id, "x", 10); return err },
+	}
+	for name, call := range analyticsCalls(ctx, e.s, id) {
+		calls[name] = call
 	}
 	for name, call := range calls {
 		wantErr(t, name, call(), tenancy.ErrNoScope)
@@ -484,19 +495,7 @@ func testListMessages(t *testing.T, e *env) {
 	e.insert(t, batch...)
 	e.complete(t, im)
 
-	var pages [][]string
-	after := int64(0)
-	for {
-		ms, err := e.s.ListMessages(e.ctx, store.MessageQuery{ChatID: c.ID, AfterOrdinal: after, Limit: 4})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(ms) == 0 {
-			break
-		}
-		pages = append(pages, bodies(ms))
-		after = ms[len(ms)-1].Ordinal
-	}
+	pages := e.pages(t, c.ID, 4)
 	if len(pages) != 3 || !slices.Equal(pages[0], []string{"m01", "m02", "m03", "m04"}) || !slices.Equal(pages[2], []string{"m09", "m10"}) {
 		t.Errorf("pages = %v", pages)
 	}

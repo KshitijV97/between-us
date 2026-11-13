@@ -1,0 +1,18 @@
+# version: 1
+# Romanised Hindi question openers (M-017), after variant folding.
+kya
+kyun
+kaise
+kab
+kahan
+kaun
+kitna
+kitni
+kitne
+kidhar
+kis
+kisko
+kiska
+kiski
+konsa
+kaunsa

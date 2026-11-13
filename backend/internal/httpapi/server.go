@@ -14,7 +14,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kshitijv97/between-us/backend/internal/analysis"
 	"github.com/kshitijv97/between-us/backend/internal/config"
+	"github.com/kshitijv97/between-us/backend/internal/store"
+	"github.com/kshitijv97/between-us/backend/internal/tenancy"
 )
 
 // Server timeouts. Header and idle limits protect against slow-loris clients;
@@ -37,6 +40,13 @@ type Options struct {
 	UI fs.FS
 	// Checks are readiness probes run by GET /readyz, keyed by component name.
 	Checks map[string]ReadinessCheck
+	// Store and Analysis enable the data endpoints; nil leaves only health,
+	// version and the UI (e.g. hosted profiles before M5).
+	Store    store.Store
+	Analysis *analysis.Service
+	// LocalScope is the implicit tenant of local mode (FR-ADM-001). Nil in
+	// hosted mode, where sign-in (M5) will provide the scope.
+	LocalScope *tenancy.Scope
 }
 
 // Server wires routes and middleware around an http.Server.
@@ -71,6 +81,9 @@ func (s *Server) routes() *http.ServeMux {
 
 	// Versioned public API (FR-API-001).
 	mux.HandleFunc("GET /api/v1/system/info", s.handleSystemInfo)
+	if s.opts.Store != nil && s.opts.Analysis != nil {
+		s.registerChatRoutes(mux)
+	}
 	// Anything else under /api/ is a JSON 404, never the SPA's index.html.
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
 		writeProblem(w, r, http.StatusNotFound, "No such API endpoint.")

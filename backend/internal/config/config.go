@@ -66,6 +66,9 @@ type Config struct {
 	DataDir string
 
 	DB DBConfig
+	// LexiconDir overrides the embedded sentiment/affection lexicons
+	// (BU_LEXICON_DIR, docs/04-metrics-catalog.md §9.3).
+	LexiconDir string
 	// MigrateOnStart applies migrations when `serve` starts. Local default;
 	// hosted deployments migrate from CI instead (docs/07-deployment.md §10).
 	MigrateOnStart bool
@@ -122,6 +125,7 @@ func Load(lookup Lookup) (Config, error) {
 		},
 	}
 
+	cfg.LexiconDir = get("BU_LEXICON_DIR")
 	cfg.DataDir = get("BU_DATA_DIR")
 	if cfg.DataDir == "" {
 		cfg.DataDir = defaultDataDir()

@@ -1,0 +1,23 @@
+# version: 1
+# Affection markers (M-023): phrase<TAB>weight[<TAB>whole_word]
+# Single-word phrases without whole_word also match as a word prefix.
+love you	1.0
+love u	1.0
+luv you	1.0
+luv u	1.0
+miss you	1.0
+miss u	1.0
+missing you	1.0
+proud of you	1.0
+take care	0.8
+thinking of you	1.0
+thinking about you	1.0
+hugs	0.8	whole_word
+kisses	0.8	whole_word
+xoxo	0.8	whole_word
+sweetheart	0.8	whole_word
+darling	0.8	whole_word
+babe	0.6	whole_word
+my love	1.0
+love of my life	1.0
+can't wait to see you	0.8

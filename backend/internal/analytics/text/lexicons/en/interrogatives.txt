@@ -1,0 +1,35 @@
+# version: 1
+# Question openers (M-017): a message starting with one of these is a question.
+what
+why
+how
+when
+where
+who
+whom
+whose
+which
+do you
+did you
+does it
+does he
+does she
+are you
+are we
+is it
+is he
+is she
+is there
+can you
+can i
+can we
+could you
+would you
+will you
+should i
+should we
+shall we
+have you
+has he
+has she
+any idea
