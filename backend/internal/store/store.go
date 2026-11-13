@@ -12,7 +12,8 @@
 //
 // Schema reference: docs/03-data-model.md. M1 creates tenants, users,
 // memberships, chats, participants, imports and messages (+ full-text index);
-// later milestones add tables through new migrations.
+// M2 adds per-message feature columns, sessions and daily_rollups. Later
+// milestones add tables through new migrations.
 package store
 
 import (
@@ -22,6 +23,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/kshitijv97/between-us/backend/internal/analytics"
 )
 
 // Sentinel errors. Implementations wrap driver errors with these so callers
@@ -67,6 +70,10 @@ type Chat struct {
 	CreatedBy      uuid.UUID
 	CreatedAt      time.Time
 	ArchivedAt     *time.Time
+	// RollupVersion and AnalyzedAt describe the last analysis run (M2);
+	// zero/nil until the chat has been analysed.
+	RollupVersion int
+	AnalyzedAt    *time.Time
 }
 
 // Participant is a sender in a chat (FR-ING-008).
@@ -145,9 +152,35 @@ type MessageQuery struct {
 	ChatID uuid.UUID
 	// From/To bound SentAt as a half-open interval [From, To); zero = unbounded.
 	From, To time.Time
-	// AfterOrdinal is a keyset cursor: return messages with Ordinal > it.
-	AfterOrdinal int64
-	Limit        int
+	// After is a keyset cursor: return messages strictly after this
+	// (SentAt, Ordinal) position, matching the (SentAt, Ordinal) sort. A zero
+	// After.SentAt means "from the start".
+	After MessageCursor
+	Limit int
+}
+
+// MessageCursor is a position in a chat's (SentAt, Ordinal) order. A pair is
+// needed because ordinals of a later import can precede earlier SentAt values.
+type MessageCursor struct {
+	SentAt  time.Time
+	Ordinal int64
+}
+
+// AnalysisWriter persists one analysis run inside a single write transaction
+// (docs/04-metrics-catalog.md §11.2): readers see either the previous complete
+// results or the new ones, never a mix. Exactly one of Finish or Abort must be
+// called.
+type AnalysisWriter interface {
+	// MessageFeatures updates the derived columns of the given messages.
+	MessageFeatures(ctx context.Context, rows []analytics.MessageFeatures) error
+	// Sessions appends sessions (the run's first call replaces all sessions
+	// of the chat).
+	Sessions(ctx context.Context, sessions []analytics.Session) error
+	// Finish replaces the chat's rollups for the writer's timezone, records
+	// rollupVersion and the analysis time on the chat, and commits.
+	Finish(ctx context.Context, rollups []analytics.Rollup, rollupVersion int) error
+	// Abort rolls back. Safe to call after Finish (no-op).
+	Abort() error
 }
 
 // Store is implemented by each SQL dialect. All methods are safe for
@@ -205,4 +238,24 @@ type Store interface {
 	// SearchMessages runs a full-text query over visible message bodies in the
 	// chat, best matches first (FR-LIB-003; SQLite FTS5 / Postgres tsvector).
 	SearchMessages(ctx context.Context, chatID uuid.UUID, query string, limit int) ([]Message, error)
+
+	// --- Analytics (M2) ---
+
+	// UpdateChatSettings stores analysis settings JSON (FR-ANA-006). The
+	// caller validates it with analytics.ParseSettings first.
+	UpdateChatSettings(ctx context.Context, chatID uuid.UUID, settings json.RawMessage) error
+	// IterateAnalysisMessages streams the chat's visible messages with
+	// SentAt in [from, to) (zero = unbounded) in (SentAt, Ordinal) order,
+	// including system and call rows, with Derived filled from the feature
+	// columns. MinutePrecision comes from the message's import; Call is
+	// decoded from meta. fn must not retain the pointer.
+	IterateAnalysisMessages(ctx context.Context, chatID uuid.UUID, from, to time.Time, fn func(*analytics.Message) error) error
+	// BeginAnalysis starts an analysis run writing rollups for timezone tz.
+	BeginAnalysis(ctx context.Context, chatID uuid.UUID, tz string) (AnalysisWriter, error)
+	// ListRollups returns all rollups of the chat for tz, ordered by
+	// (Date, ParticipantID). A chat has at most a few thousand rows.
+	ListRollups(ctx context.Context, chatID uuid.UUID, tz string) ([]analytics.Rollup, error)
+	// ListSessions returns sessions that started in [from, to) (zero =
+	// unbounded), ordered by start.
+	ListSessions(ctx context.Context, chatID uuid.UUID, from, to time.Time) ([]analytics.Session, error)
 }
