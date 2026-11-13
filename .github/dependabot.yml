@@ -11,9 +11,19 @@ updates:
     schedule: { interval: weekly }
     groups:
       web-deps: { patterns: ['*'], update-types: [minor, patch] }
+    ignore:
+      # typescript-eslint supports TypeScript < 6.1 only; revisit when it
+      # supports 7.x (the Go-native compiler).
+      - dependency-name: typescript
+        versions: ['>=7']
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
   - package-ecosystem: docker
     directory: /
     schedule: { interval: weekly }
+    ignore:
+      # Node majors are bumped by hand to the next even (LTS) release, matching
+      # web/.nvmrc and the engines field.
+      - dependency-name: node
+        update-types: ['version-update:semver-major']

@@ -2,7 +2,7 @@ module github.com/kshitijv97/between-us/backend
 
 go 1.26.0
 
-toolchain go1.27.3
+toolchain go1.27.4
 
 tool (
 	golang.org/x/vuln/cmd/govulncheck
@@ -13,7 +13,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/pressly/goose/v3 v3.29.0
 	golang.org/x/text v0.43.0
-	modernc.org/sqlite v1.61.0
+	modernc.org/sqlite v1.61.1
 )
 
 require (
